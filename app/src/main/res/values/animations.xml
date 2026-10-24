@@ -1,0 +1,1 @@
+<resources><style name="GsiSheetAnimation"><item name="android:windowEnterAnimation">@anim/gsi_sheet_enter</item><item name="android:windowExitAnimation">@anim/gsi_sheet_exit</item></style></resources>

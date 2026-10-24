@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "dm1q-fzg1-evox36",
+  "model": "SM-S911B",
+  "device": "dm1q",
+  "host_sdk": 36,
+  "firmware": "S911BXXSAFZG1",
+  "gsi": {
+    "name": "EvoX 11.11 / Android 16",
+    "file": "EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img",
+    "sha256": "5e8333e15798592bae059bcb78ba85394418afc8f035a13fc0e97c086b8c1e49",
+    "bytes": 3863474176,
+    "format": "raw-ext4"
+  },
+  "state": "tested-on-one-device",
+  "root": "KernelSU",
+  "newer_firmware": "not-tested",
+  "other_devices": "not-supported",
+  "runtime_bootstrap": "requires-prepared-runtime"
+}

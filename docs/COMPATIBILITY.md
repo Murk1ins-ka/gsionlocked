@@ -1,0 +1,26 @@
+# Compatibility
+
+| Component | Evidence |
+| --- | --- |
+| SM-S911B / dm1q / OneUI S911BXXSAFZG1 | One physical development device tested |
+| EvoX 11.11 Android 16, exact profile hash | Boot completed in bounded regression test |
+| Guest storage | Expanded from 10 to 80 GiB; filesystem check, UUID preservation and subsequent boot verified |
+| Bluetooth | User confirmed pairing with Redmi 9C |
+| PIN | User confirmed setting, persistence and unlock |
+| Fingerprint | User confirmed enrollment, unlock, persistence and corrected icon |
+| Face | User confirmed enrollment and unlock; RGB/software implementation |
+| Camera | User confirmed operation; not a complete per-lens/video test matrix |
+| Flashlight | User reported broken; device diagnosis pending |
+| SMS / verification codes | User reported broken; incoming/outgoing delivery not validated |
+| Phone calls | User reported broken; incoming/outgoing and audio not validated |
+| Google login/network/storage | Debugged in the development environment; not certified across devices |
+| Battery life / temperature | No days-long battery-life validation |
+| Hardware-backed guest KeyMint | Not supported; software implementation |
+| Newer OneUI firmware | Not tested; app blocks it |
+| S23+, S23 Ultra, other regional S23 models | Not tested; app blocks them |
+| Arbitrary third-party GSI | Import/identification only; launch requires a matching port |
+| APK-only installation on a clean phone | Not available in this source preview |
+
+Changing this table or removing a model check does not create compatibility. Validate vendor ABI, service identities, display/input ownership, watchdog restoration, storage namespace, SELinux restoration and hardware on each new combination.
+
+Background on the GSI/vendor-interface relationship: [AOSP GSI documentation](https://source.android.com/docs/core/tests/vts/gsi).
