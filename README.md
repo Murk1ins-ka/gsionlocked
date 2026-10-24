@@ -22,9 +22,17 @@ This is a source preview for the working device-specific experiment. **Installin
 
 The repository does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Use your own GSI file. The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
 
-## Build the app
+## Known issues
 
-Known issues reported on the development phone: **flashlight, SMS/verification-code delivery and phone calls**. Device diagnosis is pending. See [the issue tracker](https://github.com/Murk1ins-ka/gsionlocked/issues) and [compatibility](docs/COMPATIBILITY.md).
+| Function | Status |
+| --- | --- |
+| [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Reported broken; device diagnosis pending |
+| [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | Sending and receipt not validated |
+| [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Call setup and audio not validated |
+
+See the full [compatibility matrix](docs/COMPATIBILITY.md). These are open bugs, not completed fixes.
+
+## Build the app
 
 Requirements: Python 3.10+, JDK 17, Android SDK platform 35, build-tools 35.0.0, NDK 25.2.9519653.
 
