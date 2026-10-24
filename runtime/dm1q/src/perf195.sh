@@ -11,7 +11,7 @@ while [ "$n" -lt 60 ]; do
 done
 sample=0
 while [ "$sample" -lt 5 ]; do
-    echo "PERF186_SAMPLE=$sample"
+    echo "PERF195_SAMPLE=$sample"
     date +%s
     for field in temp status current_now voltage_now capacity; do
         echo "BATTERY_FIELD=$field"
@@ -28,4 +28,4 @@ while [ "$sample" -lt 5 ]; do
     sample=$((sample+1))
     sleep 20
 done
-echo PERF186_FINISHED
+echo PERF195_FINISHED

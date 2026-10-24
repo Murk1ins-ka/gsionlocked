@@ -13,7 +13,7 @@
 | Flashlight | User reported broken; device diagnosis pending |
 | SMS / verification codes | User reported broken; incoming/outgoing delivery not validated |
 | Phone calls | User reported broken; incoming/outgoing and audio not validated |
-| Google Play storage reporting | User reports full storage / insufficient space; actual guest free space and cause still need diagnosis ([issue #4](https://github.com/Murk1ins-ka/gsionlocked/issues/4)) |
+| App downloads and installation | Guest reports over 75 GiB free; MediaStore write/read and installer staging pass. Missing ART daemon and inherited host standby filtering reproduced and isolated; DownloadManager succeeded with a temporary rule lease. User confirmed Aurora downloads, but Play Store still failed before the combined profile retest ([issue #4](https://github.com/Murk1ins-ka/gsionlocked/issues/4)) |
 | Google login/network/storage | Debugged in the development environment; not certified across devices |
 | Battery life / temperature | No days-long battery-life validation |
 | Hardware-backed guest KeyMint | Not supported; software implementation |

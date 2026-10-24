@@ -1,6 +1,8 @@
-# gsionlocked
+<p align="center"><img src="docs/assets/banner.svg" width="100%" alt="gsionlocked" /></p>
 
-**Известные ошибки:** фонарик, SMS и звонки сообщены как неработающие; проверка на устройстве ещё предстоит. Приём SMS-кодов пока не подтверждён. Также [Google Play сообщает о заполненной памяти / нехватке места](https://github.com/Murk1ins-ka/gsionlocked/issues/4); причина пока не установлена.
+[Скачать APK](https://github.com/Murk1ins-ka/gsionlocked/releases) · [Подготовка](docs/SETUP.md) · [Telegram](https://t.me/gsionlocked) · [English](README.md)
+
+**Известные ошибки:** фонарик, SMS и звонки сообщены как неработающие; проверка на устройстве ещё предстоит. Приём SMS-кодов пока не подтверждён.
 
 Приложение и исходники экспериментального запуска GSI в отдельной среде на Galaxy S23.
 

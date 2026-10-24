@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340">
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#22252d"/><stop offset="1" stop-color="#08090c"/></linearGradient>
+    <linearGradient id="silver"><stop stop-color="#fff"/><stop offset="1" stop-color="#a4adbc"/></linearGradient>
+  </defs>
+  <rect width="1200" height="340" rx="28" fill="url(#bg)"/>
+  <g fill="none" stroke="#383e4a"><circle cx="1140" cy="20" r="230"/><circle cx="1140" cy="20" r="275"/><circle cx="1140" cy="20" r="320"/></g>
+  <text x="64" y="65" fill="#a9b7d0" font-family="Arial,sans-serif" font-size="14" letter-spacing="3">SOURCE PREVIEW</text>
+  <text x="60" y="162" fill="url(#silver)" font-family="Arial,sans-serif" font-size="78" font-weight="700" letter-spacing="-3">gsionlocked</text>
+  <text x="64" y="211" fill="#b2bbc9" font-family="Arial,sans-serif" font-size="22">GSI launcher for Galaxy S23</text>
+  <path d="M64 258h1072" stroke="#3c424e"/>
+  <g fill="#c9d0dc" font-family="Arial,sans-serif" font-size="16"><text x="64" y="300">SM-S911B / dm1q</text><text x="420" y="300">Evolution X 11.11</text><text x="1000" y="300">by murk1ins</text></g>
+</svg>

@@ -11,13 +11,13 @@ done
 [ "$(getprop sys.boot_completed)" = 1 ] || exit 21
 changed=0
 if ! dumpsys package org.evolution.udfps.icons | grep -q 'versionCode=179 '; then
-    pm install -r --user 0 /data/local/tmp/UdfpsIcons186.apk || exit 22
+    pm install -r --user 0 /data/local/tmp/UdfpsIcons195.apk || exit 22
     changed=1
 fi
 if ! cmd overlay list android | grep -q '\[x\] com.android.shell:dm1qAdaptive180'; then
     cmd overlay fabricate --target android --name dm1qAdaptive180 android:integer/config_defaultRefreshRate 0x10 120 && cmd overlay enable --user 0 com.android.shell:dm1qAdaptive180
 fi
-echo ICON186_PREVIOUS_VALUE
+echo ICON195_PREVIOUS_VALUE
 settings get system udfps_icon
 if [ "$(settings get system udfps_icon)" != 1 ]; then
     settings put system udfps_icon 1 || exit 23
@@ -25,8 +25,8 @@ if [ "$(settings get system udfps_icon)" != 1 ]; then
 fi
 [ "$(settings get system udfps_icon)" = 1 ] || exit 24
 if [ "$changed" = 1 ]; then
-    echo ICON186_GUEST_SYSTEMUI_RELOAD
+    echo ICON195_GUEST_SYSTEMUI_RELOAD
     am crash --user 0 com.android.systemui
     sleep 4
 fi
-echo ICON186_PACKAGE_READY
+echo ICON195_PACKAGE_READY

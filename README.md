@@ -1,6 +1,4 @@
-<p align="center"><img src="app/src/main/res/drawable-nodpi/brand_logo.png" width="144" alt="gsionlocked logo" /></p>
-<h1 align="center">gsionlocked</h1>
-<p align="center">GSI launcher and experimental userspace runtime for Galaxy S23.</p>
+<p align="center"><img src="docs/assets/banner.svg" width="100%" alt="gsionlocked — GSI launcher for Galaxy S23" /></p>
 <p align="center">
 <a href="https://github.com/Murk1ins-ka/gsionlocked/actions/workflows/build.yml"><img src="https://github.com/Murk1ins-ka/gsionlocked/actions/workflows/build.yml/badge.svg" alt="Build" /></a>
 <a href="https://github.com/Murk1ins-ka/gsionlocked/releases"><img src="https://img.shields.io/github/v/release/Murk1ins-ka/gsionlocked?include_prereleases&label=preview&color=6d83bc" alt="Preview" /></a>
@@ -16,9 +14,16 @@
 
 The app can import a raw ext4 `.img`, calculate its SHA-256, select the prepared image, change guest storage, check root, and display actual launch commands and output. Importing an image does not make it compatible: an unknown image cannot start through the dm1q profile.
 
-## Current installation status
+## App controls
 
-This is a source preview for the working device-specific experiment. **Installing the APK alone on a new phone is not sufficient.** It requires a prepared, matching userspace runtime. The original development phone has that runtime; a clean-device bootstrap package has not yet been validated or included. See [setup status](docs/SETUP.md) before downloading an APK.
+| Control | Action |
+| --- | --- |
+| **Select GSI** | Choose the prepared image or import a raw ext4 `.img`; verify SHA-256 |
+| **Check root** | Check root access and the device profile |
+| **Storage** | Allocate persistent guest storage; increasing it preserves data |
+| **Start** | Start the prepared runtime and show real commands and logs |
+
+The development phone has a prepared runtime. A bootstrap package for a clean phone is not included yet. Read the [setup status](docs/SETUP.md) before downloading an APK.
 
 The repository does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Use your own GSI file. The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
 
@@ -43,7 +48,6 @@ This is the image used by the tested dm1q profile, not a claim that other EvoX v
 | [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Reported broken; device diagnosis pending |
 | [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | Sending and receipt not validated |
 | [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Call setup and audio not validated |
-| [Google Play storage error](https://github.com/Murk1ins-ka/gsionlocked/issues/4) | Reports full storage / insufficient space; cause not yet diagnosed |
 
 See the full [compatibility matrix](docs/COMPATIBILITY.md). These are open bugs, not completed fixes.
 

@@ -4,7 +4,7 @@ import java.nio.file.*;
 import java.util.regex.*;
 
 /** Root-owned maintenance session: no routine timer; normal guest return works. */
-public final class EvoxWork186 {
+public final class EvoxWork195 {
     private static String hostQuery(String... args)throws Exception{
         Process process=new ProcessBuilder(args).redirectErrorStream(true).start();
         if(!process.waitFor(3,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new IOException("Host readiness query timed out");}
@@ -62,7 +62,7 @@ public final class EvoxWork186 {
             Process guest=null,guardian=null,diagnostics=null,crashLog=null,keyguardCapture=null,uiDiagnostics=null,iconSetup=null,perfProfile=null;
             HostWifiLease hostWifi=wifi?new HostWifiLease():null;
             try{
-                int thermal=new ProcessBuilder(wifi?"/data/local/tmp/tempgsi-gsionlocked186/guardian186":"/data/local/tmp/tempgsi-gsionlocked186/guardian186","--check-thermal").inheritIO().start().waitFor();
+                int thermal=new ProcessBuilder(wifi?"/data/local/tmp/tempgsi-gsionlocked195/guardian195":"/data/local/tmp/tempgsi-gsionlocked195/guardian195","--check-thermal").inheritIO().start().waitFor();
                 if(thermal!=0)throw new IOException("Phone is too warm or battery temperature is unavailable; no guest started");
                 File[] processes=new File("/proc").listFiles();if(processes==null)throw new IOException("Cannot inspect existing guest processes");
                 for(File process:processes){
@@ -82,7 +82,7 @@ public final class EvoxWork186 {
                 builder.command().add("--camera-handoff");
                 builder.command().add("--fingerprint-probe");
                 builder.command().add("--gatekeeper-handoff");
-                builder.environment().put("CLASSPATH",wifi?"/data/local/tmp/tempgsi-gsionlocked186/work186.jar":"/data/local/tmp/tempgsi-gsionlocked186/work186.jar");builder.redirectErrorStream(true);guest=builder.start();
+                builder.environment().put("CLASSPATH",wifi?"/data/local/tmp/tempgsi-gsionlocked195/work195.jar":"/data/local/tmp/tempgsi-gsionlocked195/work195.jar");builder.redirectErrorStream(true);guest=builder.start();
                 Pattern ready=Pattern.compile("PRIVATE_SURFACEFLINGER_PID=(\\d+)_WAITING_FOR_EXTERNAL_DISPLAY_LEASE");
                 Pattern server=Pattern.compile("PRIVATE_SYSTEMSERVER_(?:STACK_REQUEST_PID|SESSION_UNLIMITED_PID)=(\\d+)");
                 try(BufferedReader input=new BufferedReader(new InputStreamReader(guest.getInputStream()))){
@@ -92,7 +92,7 @@ public final class EvoxWork186 {
                             if(guardian!=null)throw new IllegalStateException("Duplicate display readiness");
                             final String pid=match.group(1);System.out.println("WORK_GUEST_DISPLAY_PID="+pid);
 
-                            ProcessBuilder guardianBuilder=new ProcessBuilder(radio?"/data/local/tmp/tempgsi-gsionlocked186/guardian186":wifi?"/data/local/tmp/tempgsi-gsionlocked186/guardian186":"/data/local/tmp/tempgsi-gsionlocked186/guardian186","--run-quiesced",pid,radio?Integer.toString(radioSeconds):wifi&&!wifiUnlimited?"180":"180");
+                            ProcessBuilder guardianBuilder=new ProcessBuilder(radio?"/data/local/tmp/tempgsi-gsionlocked195/guardian195":wifi?"/data/local/tmp/tempgsi-gsionlocked195/guardian195":"/data/local/tmp/tempgsi-gsionlocked195/guardian195","--run-quiesced",pid,radio?Integer.toString(radioSeconds):wifi&&!wifiUnlimited?"180":"180");
                             if(wifi)guardianBuilder.command().add(mobile?"--lease-pin169":radio?"--lease-wifi-browser-radio":"--lease-wifi-browser");
                             guardian=guardianBuilder.redirectErrorStream(true).redirectOutput(guardianLog).start();
                             if(radio&&!new File(directory,"radio-guardian-started144").createNewFile())throw new IOException("Radio cleanup gate already exists");
@@ -116,18 +116,18 @@ public final class EvoxWork186 {
                             System.out.println("WORK_PRIVATE_SYSTEM_SERVER_PID="+foundServer.group(1));
                             System.out.println("WORK_GUEST_READY_FOR_EXPLICIT_HARDWARE_DIAGNOSIS");
                             if(iconSetup==null){
-                                File icon186=File.createTempFile("work-icon186-",".log",directory);
-                                iconSetup=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/icon186.sh").redirectErrorStream(true).redirectOutput(icon186).start();
-                                System.out.println("WORK_ICON186_LOG="+icon186);
+                                File icon195=File.createTempFile("work-icon195-",".log",directory);
+                                iconSetup=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/icon195.sh").redirectErrorStream(true).redirectOutput(icon195).start();
+                                System.out.println("WORK_ICON195_LOG="+icon195);
                                 if(collectIdleProfile){
-                                    File idle186=File.createTempFile("work-idle186-",".log",directory);
-                                    perfProfile=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/idle186.sh").redirectErrorStream(true).redirectOutput(idle186).start();
-                                    System.out.println("WORK_IDLE186_LOG="+idle186);
+                                    File idle195=File.createTempFile("work-idle195-",".log",directory);
+                                    perfProfile=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/idle195.sh").redirectErrorStream(true).redirectOutput(idle195).start();
+                                    System.out.println("WORK_IDLE195_LOG="+idle195);
                                 }
                                 if(collectUiDiagnostics){
-                                File perf186=File.createTempFile("work-perf186-",".log",directory);
-                                perfProfile=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/perf186.sh").redirectErrorStream(true).redirectOutput(perf186).start();
-                                System.out.println("WORK_PERF186_LOG="+perf186);
+                                File perf195=File.createTempFile("work-perf195-",".log",directory);
+                                perfProfile=new ProcessBuilder("/data/local/tmp/tempgsi-guest-exec","--pid",foundServer.group(1),"/system/bin/sh","/data/local/tmp/perf195.sh").redirectErrorStream(true).redirectOutput(perf195).start();
+                                System.out.println("WORK_PERF195_LOG="+perf195);
                                 }
                             }
                             if(collectUiDiagnostics&&uiDiagnostics==null){

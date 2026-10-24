@@ -1,5 +1,6 @@
 // Temporary allowances for installed guest app UIDs in the host cgroup.
 // BACKGROUND_MATCH: AOSP Connectivity/bpf_progs/netd.h, bit 12.
+// Host STANDBY_MATCH (bit 3) must not block an unrelated guest app sharing its UID.
 // Preserve global configuration and snapshot/restore every leased UID entry.
 #ifndef TEMPGSI_BACKGROUND_UID_LEASE_H
 #define TEMPGSI_BACKGROUND_UID_LEASE_H
@@ -58,11 +59,11 @@ static int bg_uid_begin(struct bg_uid_lease *lease){
     int result=bg_uid_lookup(lease->fd,lease->uid,&lease->before);
     if(result&&errno!=ENOENT)return -1;
     lease->existed=!result;lease->leased=lease->before;
-    if((lease->leased.rule&((1U<<12)|(1U<<4)))==((1U<<12)|(1U<<4))){puts("BROWSER_UID_ALREADY_ALLOWED_IN_HOST_BACKGROUND_CHAIN");return 0;}
-    lease->leased.rule|=(1U<<12)|(1U<<4);
+    lease->leased.rule=(lease->leased.rule|(1U<<12)|(1U<<4))&~(1U<<3);
+    if(!memcmp(&lease->leased,&lease->before,sizeof(lease->leased))){puts("GUEST_UID_ALREADY_ALLOWED_IN_HOST_BACKGROUND_AND_STANDBY_CHAINS");return 0;}
     if(bg_uid_write(lease->fd,lease->uid,&lease->leased,lease->existed?BPF_EXIST:BPF_NOEXIST))return -1;
     lease->applied=1;
-    printf("BROWSER_UID_BACKGROUND_ALLOWANCE_APPLIED_UID=%u_GLOBAL_RULES_UNCHANGED\n",lease->uid);fflush(stdout);return 0;
+    printf("GUEST_UID_BACKGROUND_AND_STANDBY_LEASE_APPLIED_UID=%u_GLOBAL_RULES_UNCHANGED\n",lease->uid);fflush(stdout);return 0;
 }
 static int bg_uid_restore(struct bg_uid_lease *lease){
     int result=0;
