@@ -10,7 +10,11 @@
     "file": "EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img",
     "sha256": "5e8333e15798592bae059bcb78ba85394418afc8f035a13fc0e97c086b8c1e49",
     "bytes": 3863474176,
-    "format": "raw-ext4"
+    "format": "raw-ext4",
+    "archive": "EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img.xz",
+    "build_date": "2026-09-20",
+    "architecture": "arm64-ab",
+    "variant": "GAPPS"
   },
   "state": "tested-on-one-device",
   "root": "KernelSU",

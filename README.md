@@ -22,6 +22,20 @@ This is a source preview for the working device-specific experiment. **Installin
 
 The repository does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Use your own GSI file. The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
 
+## GSI used in development
+
+**Evolution X (EvoX) 11.11, Android 16 / SDK 36**, build **2026-09-20**, ARM64 A/B Treble, GApps variant.
+
+- Original archive: `EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img.xz`
+- Decompressed raw ext4 image size: **3,863,474,176 bytes**.
+- SHA-256 of the **decompressed `.img`**, not the `.xz` archive:
+
+```text
+5e8333e15798592bae059bcb78ba85394418afc8f035a13fc0e97c086b8c1e49
+```
+
+This is the image used by the tested dm1q profile, not a claim that other EvoX versions are interchangeable. The image and its bundled Google apps are not redistributed in this repository. See [profile metadata](profiles/dm1q-fzg1.json).
+
 ## Known issues
 
 | Function | Status |
@@ -29,6 +43,7 @@ The repository does not contain a GSI image, Google apps, Samsung vendor binarie
 | [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Reported broken; device diagnosis pending |
 | [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | Sending and receipt not validated |
 | [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Call setup and audio not validated |
+| [Google Play storage error](https://github.com/Murk1ins-ka/gsionlocked/issues/4) | Reports full storage / insufficient space; cause not yet diagnosed |
 
 See the full [compatibility matrix](docs/COMPATIBILITY.md). These are open bugs, not completed fixes.
 
