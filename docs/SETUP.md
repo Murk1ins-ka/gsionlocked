@@ -4,6 +4,8 @@
 
 The app uses `/data/local/tmp/gsionlocked-profile.properties`, owned by root with mode 0600. This file identifies the matching runtime directory, entry class, dex jar and SHA-256 values. The profile is checked before launch. The selected GSI must match the known image digest in `profiles/dm1q-fzg1.json`.
 
+App 0.1.2 requires runtime 198 or newer, including the matching loader, guardian, jar and `artd-session.so` hashes. This prevents starting an older prepared environment without the persistent Play Store installation fix. Installing the APK does not replace runtime files. The original development phone has runtime 198 installed; clean-device provisioning remains separate work.
+
 The runtime also requires the extracted GSI/APEX environment, compatibility helpers, image-service namespace and host ABI libraries prepared by the original experiment. These are not supplied by the APK or the source-only archive.
 
 ## New phone

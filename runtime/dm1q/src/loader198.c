@@ -408,7 +408,7 @@ static int probe_zygote(int start_system_server){
     if(start_system_server&&!result){
         if(physical_display){
             pid_t wake=fork();if(wake<0)die("guest bounded display wake fork");
-            if(!wake){char *args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced195.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx64m /system/bin GuestDisplayWake",NULL};run_as_system=1;_exit(child(args));}
+            if(!wake){char *args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced198.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx64m /system/bin GuestDisplayWake",NULL};run_as_system=1;_exit(child(args));}
         }
         if(physical_display&&!access("/data/local/tmp/controller.apk",F_OK)){
             pid_t installer=fork();if(installer<0)die("guest controller install fork");
@@ -539,7 +539,7 @@ static int probe_isolated_services(int systemserver){
         run_as_system=1;int graphics_result=child(buffer_args);run_as_system=0;
         printf("PRIVATE_GRALLOC_PREFLIGHT_RESULT=%d\n",graphics_result);
         struct stat graphics_info;if(graphics_result||stat("/data/local/tmp/graphics-buffer.ok",&graphics_info)||graphics_info.st_size!=1)return 21;
-        char *log_api_args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced195.jar:/data/local/tmp/runtime-smoke.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx256m /system/bin BootLogOverlay --check-api",NULL};
+        char *log_api_args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced198.jar:/data/local/tmp/runtime-smoke.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx256m /system/bin BootLogOverlay --check-api",NULL};
         int log_api=child(log_api_args);printf("PRIVATE_PHONE_BOOT_LOG_API_RESULT=%d\n",log_api);if(log_api)return 23;
         // GPU rendering is shared safely; display composer stays on private hwbinder.
         if(chown("/data/system",1000,1000))die("system data owner");
@@ -754,7 +754,7 @@ static int probe_isolated_services(int systemserver){
         if(physical_display){
             int logger_notice[2];if(pipe2(logger_notice,O_CLOEXEC))die("phone boot logger PID pipe");
             logger_supervisor=fork();if(logger_supervisor<0)die("phone boot logger supervisor");
-            if(!logger_supervisor){close(logger_notice[0]);child_notice=logger_notice[1];char *log_args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced195.jar:/data/local/tmp/runtime-smoke.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx256m /system/bin BootLogOverlay",NULL};int log_result=child(log_args);printf("PRIVATE_PHONE_BOOT_LOG_EXIT=%d\n",log_result);_exit(log_result);}
+            if(!logger_supervisor){close(logger_notice[0]);child_notice=logger_notice[1];char *log_args[]={"/system/bin/sh","-c","while read command name value; do export \"$name=$value\" || exit 3; done < /data/system/environ/classpath; export CLASSPATH=/data/local/tmp/balanced198.jar:/data/local/tmp/runtime-smoke.jar; exec /system/bin/app_process64 -Xusejit:false -Xnoimage-dex2oat -Ximage:/no-boot-image/boot.art -Xms16m -Xmx256m /system/bin BootLogOverlay",NULL};int log_result=child(log_args);printf("PRIVATE_PHONE_BOOT_LOG_EXIT=%d\n",log_result);_exit(log_result);}
             close(logger_notice[1]);pid_t logger_pid;if(read(logger_notice[0],&logger_pid,sizeof(logger_pid))!=sizeof(logger_pid)||logger_pid<=1)die("phone boot logger PID receive");close(logger_notice[0]);
             printf("PRIVATE_PHONE_BOOT_LOG_PID=%d\n",logger_pid);
         }
@@ -851,7 +851,7 @@ int main(int argc,char **argv){
     }
     if(server_mode){
         secure_private_config("/data/local/tmp/tempgsi-private-selinux.so","u:object_r:system_file:s0");
-        secure_private_config("/data/local/tmp/tempgsi-gsionlocked195/ld.config166.txt","u:object_r:linkerconfig_file:s0");
+        secure_private_config("/data/local/tmp/tempgsi-gsionlocked198/ld.config166.txt","u:object_r:linkerconfig_file:s0");
         secure_private_config("/data/local/tmp/tempgsi-lineage-file-contexts.compat","u:object_r:file_contexts_file:s0");
         secure_private_config("/data/local/tmp/tempgsi-lineage-service-contexts.compat","u:object_r:service_contexts_file:s0");
         if(!access("/data/local/tmp/tempgsi-control.apk",F_OK))secure_private_config("/data/local/tmp/tempgsi-control.apk","u:object_r:system_file:s0");
@@ -871,7 +871,7 @@ int main(int argc,char **argv){
         subpath(path,"/efs");struct stat efs166;if(stat(path,&efs166)||!S_ISDIR(efs166.st_mode))die("camera private efs mountpoint");
         if(mount("tmpfs",path,"tmpfs",MS_NOSUID|MS_NODEV|MS_NOEXEC,"size=64k,mode=0755"))die("camera private calibration tree");
     }
-    subpath(path,"/system/framework/services.jar");bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/services-face172.jar",path);
+    subpath(path,"/system/framework/services.jar");bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/services-face172.jar",path);
     subpath(path,"/system/product/etc/permissions/privapp-permissions-google-p.xml");bind_readonly("/data/local/tmp/tempgsi-evox154/privapp-google-p.xml",path);
     subpath(path,"/data");if(mount(server_mode?argv[4]:"tmpfs",path,server_mode?"ext4":"tmpfs",MS_NOSUID|MS_NODEV,server_mode?"user_xattr":"size=128m,mode=0755"))die("private data");
     if(physical_display&&module_overlay146(base))die("private guest file modules146 overlay");
@@ -969,7 +969,7 @@ int main(int argc,char **argv){
     subpath(path,"/sys/fs/selinux/access");if(mount("/sys/fs/selinux/access",path,NULL,MS_BIND,NULL))die("SELinux access query bind");
     subpath(path,"/sys/fs/selinux/context");if(mount("/sys/fs/selinux/context",path,NULL,MS_BIND,NULL))die("SELinux context query bind");
     subpath(path,"/vendor");bind_readonly("/vendor",path);
-    if(server_mode){subpath(path,"/vendor/etc/vintf");bind_readonly(radio_takeover139?(bluetooth165?"/data/local/tmp/tempgsi-gsionlocked195/vintf":"/data/local/tmp/tempgsi-evox154/vendor-vintf-radio139"):wifi_takeover?"/data/local/tmp/tempgsi-evox154/vendor-vintf-wifi122":"/data/local/tmp/tempgsi-evox154/vendor-vintf-compat",path);}
+    if(server_mode){subpath(path,"/vendor/etc/vintf");bind_readonly(radio_takeover139?(bluetooth165?"/data/local/tmp/tempgsi-gsionlocked198/vintf":"/data/local/tmp/tempgsi-evox154/vendor-vintf-radio139"):wifi_takeover?"/data/local/tmp/tempgsi-evox154/vendor-vintf-wifi122":"/data/local/tmp/tempgsi-evox154/vendor-vintf-compat",path);}
     subpath(path,"/odm");bind_readonly("/odm",path);
     if(server_mode){subpath(path,"/system/etc/selinux/plat_file_contexts");bind_readonly("/data/local/tmp/tempgsi-lineage-file-contexts.compat",path);}
     if(server_mode){subpath(path,"/system/etc/selinux/plat_service_contexts");bind_readonly("/data/local/tmp/tempgsi-lineage-service-contexts.compat",path);}
@@ -1155,10 +1155,10 @@ int main(int argc,char **argv){
     if(server_mode||hardware_link_mode){subpath(path,"/data/local/tmp/vendor-system-compat");if(mkdir(path,0755))die("vendor system ABI directory");bind_readonly("/data/local/tmp/tempgsi-evox154/vendor-system-compat",path);}
     subpath(path,"/data/local/tmp/property-seed.bin");{FILE *out=fopen(path,"wb");if(!out)die("property seed file");if(__system_property_foreach(each_property,out))die("property enumeration");if(fclose(out))die("property seed close");}
     subpath(path,"/data/local/tmp/property-seed");{int fd=open(path,O_CREAT|O_WRONLY,0700);if(fd<0)die("property helper target");close(fd);}
-    bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/property-seed171",path);
+    bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/property-seed171",path);
     subpath(path,"/data/local/tmp/private-selinux-mount.so");{int fd=open(path,O_CREAT|O_WRONLY,0400);if(fd<0)die("SELinux mount helper target");close(fd);}
     bind_readonly("/data/local/tmp/tempgsi-private-selinux.so",path);
-    subpath(path,"/data/local/tmp/artd-session.so");{int fd=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0400);if(fd<0)die("artd session helper target");close(fd);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/artd-session.so",path);
+    subpath(path,"/data/local/tmp/artd-session.so");{int fd=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0400);if(fd<0)die("artd session helper target");close(fd);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/artd-session.so",path);
     subpath(path,"/data/local/tmp/runtime-smoke.jar");{int fd=open(path,O_CREAT|O_WRONLY,0400);if(fd<0)die("jar target");close(fd);}
     bind_readonly(wifi_takeover?"/data/local/tmp/tempgsi-runtime-smoke122.jar":"/data/local/tmp/tempgsi-runtime-smoke122.jar",path);
     if(server_mode){subpath(path,"/data/local/tmp/soft-keymintd");int fd=open(path,O_CREAT|O_WRONLY,0700);if(fd<0)die("software keymint target");close(fd);bind_readonly("/data/local/tmp/tempgsi-soft-keymintd",path);}
@@ -1169,7 +1169,7 @@ int main(int argc,char **argv){
     subpath(path,"/linkerconfig");if(mount("tmpfs",path,"tmpfs",MS_NOSUID|MS_NODEV,"size=1m,mode=0755"))die("private linkerconfig");
     inherit_private_directory_label("/linkerconfig");
     subpath(path,"/linkerconfig/ld.config.txt");{int fd=open(path,O_CREAT|O_WRONLY,0400);if(fd<0)die("linkerconfig target");close(fd);}
-    bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/ld.config166.txt",path);
+    bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/ld.config166.txt",path);
     if(server_mode){
         const char *dirs[]={"/data","/data/system","/data/system/environ","/data/dalvik-cache","/data/local","/data/local/tmp"};
         const char *context="u:object_r:system_data_file:s0";
@@ -1190,19 +1190,19 @@ int main(int argc,char **argv){
         }
     }
     if(fingerprint167){
-        subpath(path,"/data/local/tmp/fingerprint-vintf167");if(mkdir(path,0755))die("fingerprint167 manifest target");bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/fingerprint-vintf",path);
+        subpath(path,"/data/local/tmp/fingerprint-vintf167");if(mkdir(path,0755))die("fingerprint167 manifest target");bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/fingerprint-vintf",path);
         subpath(path,"/vendor/firmware_mnt");struct stat firmware167;if(stat(path,&firmware167)||!S_ISDIR(firmware167.st_mode)||access("/vendor/firmware_mnt/image/securefp.mdt",R_OK))die("fingerprint167 firmware metadata");
         bind_readonly("/vendor/firmware_mnt",path);puts("FINGERPRINT167_ORIGINAL_FIRMWARE_READONLY_NO_RAW_PARTITION");
     }
-    if(gatekeeper169){subpath(path,"/data/local/tmp/gatekeeper-isolation169.so");int marker169=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0600);if(marker169<0)die("Gatekeeper169 helper target");close(marker169);bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/gatekeeper-isolation169.so",path);}
-    if(fingerprint167){subpath(path,"/data/local/tmp/lineage-fingerprint170");int target170=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0700);if(target170<0)die("Fingerprint170 executable target");close(target170);bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/lineage-fingerprint170",path);}
+    if(gatekeeper169){subpath(path,"/data/local/tmp/gatekeeper-isolation169.so");int marker169=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0600);if(marker169<0)die("Gatekeeper169 helper target");close(marker169);bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/gatekeeper-isolation169.so",path);}
+    if(fingerprint167){subpath(path,"/data/local/tmp/lineage-fingerprint170");int target170=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0700);if(target170<0)die("Fingerprint170 executable target");close(target170);bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/lineage-fingerprint170",path);}
     if(server_mode){
-        subpath(path,"/data/local/tmp/UdfpsIcons195.apk");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/UdfpsIcons195.apk",path);
-        subpath(path,"/data/local/tmp/icon195.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/icon195.sh",path);
-        subpath(path,"/data/local/tmp/perf195.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/perf195.sh",path);
+        subpath(path,"/data/local/tmp/UdfpsIcons198.apk");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/UdfpsIcons198.apk",path);
+        subpath(path,"/data/local/tmp/icon198.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/icon198.sh",path);
+        subpath(path,"/data/local/tmp/perf198.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Icon175 payload target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/perf198.sh",path);
     }
-    if(server_mode){subpath(path,"/data/local/tmp/idle195.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Idle195 target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/idle195.sh",path);subpath(path,"/data/local/tmp/balanced195.jar");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Balanced195 helper target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/work195.jar",path);}
-    if(server_mode){subpath(path,"/data/local/tmp/gsionlocked-wallpaper.png");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("GSI wallpaper target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked195/boot-wallpaper.png",path);}
+    if(server_mode){subpath(path,"/data/local/tmp/idle198.sh");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Idle198 target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/idle198.sh",path);subpath(path,"/data/local/tmp/balanced198.jar");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("Balanced198 helper target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/work198.jar",path);}
+    if(server_mode){subpath(path,"/data/local/tmp/gsionlocked-wallpaper.png");{int f=open(path,O_CREAT|O_EXCL|O_WRONLY|O_CLOEXEC,0644);if(f<0)die("GSI wallpaper target");close(f);}bind_readonly("/data/local/tmp/tempgsi-gsionlocked198/boot-wallpaper.png",path);}
     if(server_mode){
         snapshot_apex_data_metadata();
         if(chdir(base)||syscall(SYS_pivot_root,".","mnt")||chdir("/")||chroot("."))die("private pivot root");
@@ -1282,6 +1282,10 @@ int main(int argc,char **argv){
         const char *data_context="u:object_r:system_data_file:s0";
         if(chown("/data/data",1000,1000)||chmod("/data/data",0771)||lsetxattr("/data/data","security.selinux",data_context,strlen(data_context)+1,0))die("private primary CE data");
         if(mount("/data/data","/data/user/0",NULL,MS_BIND,NULL))die("private user zero data alias");
+        // Cache belongs to guest userdata, not the nearly full GSI system image.
+        if((mkdir("/data/cache",0770)&&errno!=EEXIST)||chown("/data/cache",1000,2001)||chmod("/data/cache",0770))die("guest cache metadata");
+        const char *cache_context="u:object_r:cache_file:s0";
+        if(lsetxattr("/data/cache","security.selinux",cache_context,strlen(cache_context)+1,0)||mount("/data/cache","/cache",NULL,MS_BIND,NULL))die("guest cache mount");
         prepare_private_data_mirror();
         if(mkdir("/data/misc/profiles/cur/0",0771)&&errno!=EEXIST)die("private user profile directory");
         if(chown("/data/misc/profiles/cur/0",1000,1000))die("private user profile owner");
@@ -1297,6 +1301,11 @@ int main(int argc,char **argv){
             snprintf(media,sizeof(media),"%s/self",views[i]);if(mkdir(media,0755))die("private storage self directory");
             snprintf(media,sizeof(media),"%s/self/primary",views[i]);if(symlink("../emulated/0",media))die("private primary storage alias");
         }
+        // A late vold FUSE mount must reach INSTALLER and ANDROID_WRITABLE
+        // app namespaces too. Keep all views on guest FUSE, never raw media.
+        if(mount("/mnt/user/0","/mnt/user/0",NULL,MS_BIND,NULL)||mount(NULL,"/mnt/user/0",NULL,MS_SHARED,NULL))die("private shared storage propagation root");
+        const char *installer_views[]={"/mnt/installer/0","/mnt/androidwritable/0"};
+        for(unsigned i=0;i<2;i++)if(mount("/mnt/user/0",installer_views[i],NULL,MS_BIND|MS_REC,NULL))die("private installer FUSE view");
         if(mount("/mnt/user/0","/storage",NULL,MS_BIND|MS_REC,NULL))die("private system storage view");
         puts("PRIVATE_USER_ZERO_STORAGE_VIEWS_READY_NO_HOST_MEDIA");
         puts("PRIVATE_USER_ZERO_CE_DE_STORAGE_READY_TMPFS_NO_HOST_DATA");

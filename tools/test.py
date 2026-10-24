@@ -9,3 +9,5 @@ runtime=str(java/('java'+exe)) if java else shutil.which('java')
 with tempfile.TemporaryDirectory(prefix='gsionlocked-test-') as output:
     subprocess.run([javac,'-encoding','UTF-8','-d',output,str(ROOT/'app/src/main/java/dev/tempgsi/controller/GsiFormat.java'),str(ROOT/'tests/GsiFormatTest.java')],check=True)
     subprocess.run([runtime,'-cp',output,'GsiFormatTest'],check=True)
+    subprocess.run([javac,'-encoding','UTF-8','-d',output,str(ROOT/'app/src/main/java/dev/tempgsi/controller/RuntimeProfile.java'),str(ROOT/'tests/RuntimeProfileTest.java')],check=True)
+    subprocess.run([runtime,'-cp',output,'RuntimeProfileTest'],check=True)

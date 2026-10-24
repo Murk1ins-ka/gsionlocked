@@ -148,6 +148,23 @@ static int target_waiting_for_display(long pid,int task){
     }return 0;
 }
 static int named_service_is(const char *name,const char *expected){char value[PROP_VALUE_MAX],key[128];snprintf(key,sizeof(key),"init.svc.%s",name);__system_property_get(key,value);return !strcmp(value,expected);}
+static int stop_audio_group198(int server,int primary,int samsung){
+    const char *names[]={"audioserver","vendor.audio-hal","vendor.secaudiohal-aidl"};
+    int owned[]={server,primary,samsung},stable=0;
+    // Samsung init starts HALs when audioserver stops. Reconcile the whole
+    // group, then require a stable quiet interval before handing over devices.
+    for(int tick=0;tick<160;tick++){
+        int quiet=1;
+        for(unsigned i=0;i<3;i++)if(owned[i]&&!named_service_is(names[i],"stopped")){
+            quiet=0;
+            if(tick%5==0&&__system_property_set("ctl.stop",names[i]))return -1;
+        }
+        if(quiet){if(++stable>=10){puts("HOST_AUDIO_GROUP_STABLY_STOPPED");return 0;}}
+        else stable=0;
+        usleep(50000);
+    }
+    puts("HOST_AUDIO_GROUP_STOP_TIMEOUT_NO_GUEST_HANDOFF");return -1;
+}
 static int service_is(const char *expected){return named_service_is("surfaceflinger",expected);}
 static int set_service(const char *operation,const char *name,const char *state){
     if(__system_property_set(operation,name)){printf("HOST_SERVICE_REQUEST_FAILED_OPERATION=%s_NAME=%s_ERRNO=%d\n",operation,name,errno);return -1;}
@@ -298,9 +315,7 @@ int main(int argc,char **argv){
         if(!result&&original_zygote&&set_service("ctl.stop","zygote","stopped"))result=16;
         if(original_zygote&&named_service_is("zygote","stopped"))host_android_quiesced=1;
         if(!result&&lease_bt165&&hal_lease159_acquire(&bt165,&bt_ops165)){puts("BLUETOOTH165_HOST_STOP_FAILED");result=35;}
-        if(!result&&original_audio&&set_service("ctl.stop","audioserver","stopped"))result=28;
-        if(!result&&original_audio_hal&&set_service("ctl.stop","vendor.audio-hal","stopped"))result=28;
-        if(!result&&original_secaudio&&set_service("ctl.stop","vendor.secaudiohal-aidl","stopped"))result=28;
+        if(!result&&stop_audio_group198(original_audio,original_audio_hal,original_secaudio))result=28;
         if(!result&&lease_browser&&bg_group_begin(&browser)){puts("GUEST_UID_NETWORK_LEASE_FAILED");result=30;}
         if(!result&&lease_radio&&radio_start139(&radio)){puts("RADIO_HANDOFF_START_FAILED");result=32;}
         if(!result&&lease_radio)radio_watch139=radio.task;

@@ -10,6 +10,31 @@
 > [!IMPORTANT]
 > Source preview. A matching, prepared runtime is required; installing the APK alone on a new phone is not sufficient.
 
+## gsionlocked — Booting GSI via Treble Userspace Takeover
+
+Run a prepared Generic System Image, such as Evolution X / Android 16, over stock OneUI using the running Samsung kernel. The tested path starts a separate Android userspace without flashing physical system partitions or performing a cold kernel reboot.
+
+### How it works
+
+1. The app obtains root and verifies the device, GSI digest and prepared runtime files.
+2. The loader maps guest system/data images and builds private mount, Binder, property and network environments.
+3. A host-side guardian coordinates the handoff of OneUI services and shared hardware.
+4. Guest Zygote, SurfaceFlinger and Android services start against the stock kernel and prepared vendor integration.
+5. The guardian returns control to OneUI when the session ends; holding both volume buttons for two seconds requests a return.
+
+This is a temporary userspace session with persistent guest storage. The tested root manager is **KernelSU**; exclusive compatibility with arbitrary **TEMPROOT** methods has not been established. The current implementation does not use a global `/system` replacement, a KernelSU magic-mount module or `ksud soft-reboot`. Those are possible alternative designs, not the shipped launch path.
+
+### What this provides
+
+- Switch Android userspace without a full hardware reboot.
+- Keep stock system partitions unflashed and guest apps/files in a separate data image.
+- Reuse the stock kernel and vendor components, with hardware support tracked in the [test matrix](docs/COMPATIBILITY.md).
+- Restore host service ownership through the guardian. This remains an experiment; it does not carry a zero-risk or complete hardware-support guarantee.
+
+### Play Store installation fix
+
+**Runtime 198** connects installer storage views to the guest FUSE mount before apps start, keeps the guest ART service available and leases the required network rules for guest downloads. The owner confirmed Play Store installation again after returning to OneUI and starting a new EvoX session. **Start** requires runtime 198 or newer, verifies its hashes and reports the enabled fixes in its launch output. Updating the APK alone does not install the external prepared runtime.
+
 **Preview release.** The tested combination is **SM-S911B / dm1q, OneUI S911BXXSAFZG1, EvoX 11.11 Android 16**. Newer firmware, other S23 variants, S23+ and S23 Ultra are not validated. The app checks compatibility before starting.
 
 The app can import a raw ext4 `.img`, calculate its SHA-256, select the prepared image, change guest storage, check root, and display actual launch commands and output. Importing an image does not make it compatible: an unknown image cannot start through the dm1q profile.
@@ -45,9 +70,9 @@ This is the image used by the tested dm1q profile, not a claim that other EvoX v
 
 | Function | Status |
 | --- | --- |
-| [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Reported broken; device diagnosis pending |
-| [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | Sending and receipt not validated |
-| [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Call setup and audio not validated |
+| [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Torch API test passed; physical light / Quick Settings confirmation pending |
+| [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | User reported no incoming SMS; investigation deferred |
+| [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Owner confirmed calls work; full incoming/outgoing/audio matrix pending |
 
 See the full [compatibility matrix](docs/COMPATIBILITY.md). These are open bugs, not completed fixes.
 

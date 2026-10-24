@@ -31,11 +31,13 @@ public final class SessionMain {
         Properties p=new Properties();try(InputStream in=new FileInputStream(marker)){p.load(in);}
         String dir=p.getProperty("directory",""),entry=p.getProperty("entry",""),jar=p.getProperty("jar","");
         if(!dir.matches("/data/local/tmp/tempgsi-[a-z]+[0-9]+")||!entry.matches("EvoxWork[0-9]+")||!jar.matches("work[0-9]+\\.jar"))throw new IOException("Invalid prepared profile");
+        int revision=RuntimeProfile.requireInstallFixes(p);
         int count=0;for(String key:p.stringPropertyNames())if(key.startsWith("sha.")){
             String name=key.substring(4),digest=p.getProperty(key);if(!name.matches("[A-Za-z0-9._-]+")||!digest.matches("[a-f0-9]{64}"))throw new IOException("Invalid profile hash");
             File file=new File(dir,name);if(!file.isFile()||!sha(file).equals(digest))throw new IOException("Prepared file differs: "+name);count++;System.out.println("SHA-256 OK: "+name);
         }
         if(count<10||!p.containsKey("sha."+jar))throw new IOException("Prepared profile incomplete");
+        System.out.println("Runtime "+revision+" verified: installer storage views, ART lifetime and download UID lease fixes enabled.");
         ProcessBuilder launch=new ProcessBuilder("/system/bin/app_process","-Xms16m","-Xmx64m","/system/bin",entry,"--stay-in-lineage-mobile145","--data-mib",Integer.toString(mib),"--controller-apk",args[0]);
         launch.environment().put("CLASSPATH",dir+"/"+jar);
         System.out.println("CLASSPATH="+dir+"/"+jar);System.out.println("$ "+String.join(" ",launch.command()));
