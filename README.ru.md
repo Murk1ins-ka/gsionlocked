@@ -2,7 +2,7 @@
 
 [Скачать APK](https://github.com/Murk1ins-ka/gsionlocked/releases) · [Подготовка](docs/SETUP.md) · [Telegram](https://t.me/gsionlocked) · [English](README.md)
 
-**Проверки:** пользователь подтвердил работу звонков. API фонарика прошёл тест, но работа света и плитки быстрых настроек ещё требует подтверждения. Входящие SMS не работают; дальнейшую проверку отложили.
+**Не работают:** [микрофон](https://github.com/Murk1ins-ka/gsionlocked/issues/5), [SMS и SMS-коды](https://github.com/Murk1ins-ka/gsionlocked/issues/2), [фонарик](https://github.com/Murk1ins-ka/gsionlocked/issues/1). Ошибки подтверждены сообщением владельца устройства и остаются открытыми. Пользователь подтвердил работу звонков.
 
 Приложение и исходники экспериментального запуска GSI в отдельной среде на Galaxy S23.
 

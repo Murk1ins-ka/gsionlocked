@@ -10,9 +10,9 @@
 | Fingerprint | User confirmed enrollment, unlock, persistence and corrected icon |
 | Face | User confirmed enrollment and unlock; RGB/software implementation |
 | Camera | User confirmed operation. Foreground Camera2/MediaRecorder test saved a readable three-second 640×480 H.264 MP4 with an AAC track; audible microphone capture and all lenses remain unverified |
-| Microphone | Initial PCM probe returned zero samples; further capture testing required |
-| Flashlight | Camera API successfully enabled and disabled the rear torch; Quick Settings tile and physical light confirmation remain pending |
-| SMS / verification codes | User reported no incoming SMS; further investigation deferred at the owner's request |
+| Microphone | Not working, reported by the owner; initial PCM probe captured silence ([issue #5](https://github.com/Murk1ins-ka/gsionlocked/issues/5)) |
+| Flashlight | Not working, reported by the owner; passing torch API calls did not establish working light ([issue #1](https://github.com/Murk1ins-ka/gsionlocked/issues/1)) |
+| SMS / verification codes | Not working; owner reports no incoming SMS. Further investigation deferred at the owner's request ([issue #2](https://github.com/Murk1ins-ka/gsionlocked/issues/2)) |
 | Phone calls | Owner confirmed calls work in EvoX; separate outgoing/incoming and two-way audio checks remain pending |
 | App downloads and installation | Owner confirmed Play Store download and installation both after the live storage fix and after a new profile-198 session. Installer FUSE views, ART session persistence and inherited standby filtering are fixed in that runtime ([issue #4](https://github.com/Murk1ins-ka/gsionlocked/issues/4)) |
 | Google login/network/storage | Debugged in the development environment; not certified across devices |

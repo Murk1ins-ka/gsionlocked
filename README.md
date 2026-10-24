@@ -70,8 +70,9 @@ This is the image used by the tested dm1q profile, not a claim that other EvoX v
 
 | Function | Status |
 | --- | --- |
-| [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Torch API test passed; physical light / Quick Settings confirmation pending |
-| [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | User reported no incoming SMS; investigation deferred |
+| [Microphone](https://github.com/Murk1ins-ka/gsionlocked/issues/5) | Not working; reported by the device owner |
+| [Flashlight](https://github.com/Murk1ins-ka/gsionlocked/issues/1) | Not working; reported by the device owner despite the torch API test passing |
+| [SMS and verification codes](https://github.com/Murk1ins-ka/gsionlocked/issues/2) | Not working; incoming SMS fails and verification-code delivery is not supported reliably |
 | [Phone calls](https://github.com/Murk1ins-ka/gsionlocked/issues/3) | Owner confirmed calls work; full incoming/outgoing/audio matrix pending |
 
 See the full [compatibility matrix](docs/COMPATIBILITY.md). These are open bugs, not completed fixes.
