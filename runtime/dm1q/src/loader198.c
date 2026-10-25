@@ -827,10 +827,9 @@ int main(int argc,char **argv){
         struct stat info;
         if(bt_address165<0||fstat(bt_address165,&info)||!S_ISREG(info.st_mode)||info.st_size>64)die("Bluetooth address metadata");
     }
-#ifdef TEMPGSI_HAL_PROFILE151
-    {char firmware[PROP_VALUE_MAX];if(__system_property_get("ro.bootloader",firmware)<=0||strcmp(firmware,"S911BXXSAFZG1")){
-        fputs("HAL_PROFILE151_FIRMWARE_MISMATCH_NO_MOUNTS_CHANGED\n",stderr);return 31;}}
-#endif
+    /* Device names/bootloader versions do not establish runtime compatibility.
+     * Use a complete, locally prepared profile; hardware adapters remain specific
+     * to the phone from which they were prepared. */
     if(server_mode){
         char group[256],control[300],pid[32];snprintf(group,sizeof(group),"/sys/fs/cgroup/tempgsi_session_%d",getppid());
         if(getppid()<=1||mkdir(group,0755))die("exclusive guest session cgroup");

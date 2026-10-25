@@ -2,6 +2,7 @@
   "schema": 1,
   "id": "dm1q-coloros17-x9u-in",
   "model": "SM-S911B",
+  "model_name_enforced": false,
   "device": "dm1q",
   "host_sdk": 36,
   "host_services_sha256": "86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3",

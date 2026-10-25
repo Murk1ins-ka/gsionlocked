@@ -20,8 +20,8 @@
 | Google login/network/storage | Debugged in the development environment; not certified across devices |
 | Battery life / temperature | No days-long battery-life validation |
 | Hardware-backed guest KeyMint | Not supported; software implementation |
-| Newer OneUI firmware | Not tested; app blocks it |
-| S23+, S23 Ultra, other regional S23 models | Not tested; app blocks them |
+| Newer OneUI firmware | Not tested; name-based block removed in 0.2.1, Android 16 / ARM64 and compatible runtime still required |
+| S23+, S23 Ultra, other regional S23 models | Not tested; model-name block removed in 0.2.1, device-specific runtime still required |
 | Arbitrary third-party GSI | Import/identification only; launch requires a matching port |
 | APK-only installation on a clean phone | Not available in this source preview |
 
@@ -47,4 +47,4 @@ runtime or a clean-device installation. See [profile](../profiles/dm1q-coloros17
 | PIN/password, fingerprint, face unlock | Password/PIN does not work: [ColorOS #6](https://github.com/Murk1ins-ka/gsionlocked/issues/6); biometrics unsupported, credential guards retained, do not enroll |
 | SELinux | Guest still experimental/Permissive; full enforcing policy not completed |
 | Temperature | Battery 36.8 °C, thermal status 0 after short camera test; endurance and sustained load not verified |
-| Other devices / arbitrary GSI | Unsupported; prepared runtime required |
+| Other devices / arbitrary GSI | Model-name block removed in 0.2.1; untested devices still require compatible device-specific runtime; arbitrary GSI needs its own port |

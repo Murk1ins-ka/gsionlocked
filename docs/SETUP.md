@@ -21,7 +21,11 @@ Run the read-only audit:
 python tools/check_device.py --adb /path/to/adb
 ```
 
-The audit checks model, firmware and whether the runtime profile exists. It does not install a runtime or modify Android. A passing model/firmware check alone is not a complete installation.
+The audit reports model/firmware as tested or untested, but does not reject by
+their names. It checks Android 16 / ARM64 and whether the runtime profile exists.
+It does not install a runtime or modify Android. An accepted host platform alone
+is not a complete installation. Model-name restrictions were removed in 0.2.1;
+device-specific adapters and the ColorOS host-framework digest remain required.
 
 A reproducible clean-device bootstrap is still required before this preview can become a public end-user release. It must extract required system files from a user-provided GSI, obtain host/vendor files from that same phone, build the adapters from source, prepare a fresh private data volume and atomically install a complete profile. Publishing an APK does not complete those steps.
 

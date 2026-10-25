@@ -5,8 +5,7 @@ BB=/data/adb/ksu/bin/busybox
 fail() { echo "Проверка не пройдена: $*"; exit 2; }
 [ "$(id -u)" = 0 ] || fail 'нет root'
 [ "$(getprop ro.build.version.sdk)" = 36 ] || fail 'запуск разрешён только из One UI Android 16'
-[ "$(getprop ro.product.model)" = SM-S911B ] || fail 'нужен Galaxy S23 SM-S911B'
-[ "$(getprop ro.product.vendor.device)" = dm1q ] || fail 'модель устройства не совпадает'
+[ "$(getprop ro.product.cpu.abi)" = arm64-v8a ] || fail 'нужна архитектура arm64-v8a'
 [ "$(getenforce)" = Enforcing ] || fail 'состояние One UI не подтверждено'
 [ -x "$BB" ] || fail 'не найден KernelSU busybox'
 [ -d "$S" ] && [ ! -L "$S" ] || fail 'образ не подготовлен'

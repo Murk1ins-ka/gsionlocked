@@ -42,6 +42,7 @@ public final class MainActivity extends Activity {
         Ui.space(page,28);
         LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?(ColorOsProfile.guest()?"ColorOS 17 is running":"EvoX is running"):selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
         status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"ColorOS 17 added · select your prepared GSI",14,Ui.MUTED);Ui.space(page,8);
+        if(!inside&&!DeviceProfile.testedHost())Ui.text(card,"Модель не ограничена. На других устройствах запуск не проверен; нужен совместимый подготовленный runtime. Текущий загрузчик: Android 16 / arm64.",12,Ui.MUTED);
         buttons.add(Ui.button(page,"Select GSI",false,this::chooseGsi));
         buttons.add(Ui.button(page,"Check root",false,()->{if(inside){status.setText("Check root from One UI before launch.");return;}task("Checking root…",()->{String r=RootCommands.run(this,"id");if(!r.contains("uid=0(root)"))throw new IOException("Allow root access in KernelSU.");if(ColorOsProfile.matches(selectedSha))return RootCommands.stream(this,ColorOsProfile.command(this,"status"),this::appendLog,180,()->isDestroyed(),false);return "Root access confirmed.";});}));
         buttons.add(Ui.button(page,"Start",true,()->{
@@ -50,7 +51,7 @@ public final class MainActivity extends Activity {
             if(busy)return;if(selectedSha==null){status.setText("Select a GSI first.");return;}launchActive=true;sessionExit=null;sessionError=null;synchronized(logText){logText.setLength(0);}launchPanel.setVisibility(android.view.View.VISIBLE);launchPanel.post(()->launchPanel.requestRectangleOnScreen(new android.graphics.Rect(0,0,launchPanel.getWidth(),launchPanel.getHeight()),false));
             final int requested=mib;final String imageSha=selectedSha;task("Starting…",()->{
                 DeviceProfile.requireHost();
-                if(!DeviceProfile.SHA256.equals(selectedSha))throw new IOException("No runtime profile supports this image. The tested S23 profile requires the EvoX image listed in profiles/dm1q-fzg1.json.");
+                if(!DeviceProfile.SHA256.equals(selectedSha))throw new IOException("No prepared runtime profile supports this image. This EvoX profile requires the image listed in profiles/dm1q-fzg1.json.");
                 appendLog("Selected GSI: "+selectedName);
                 appendLog("SHA-256: "+selectedSha);
                 appendLog("Extracting session-launch from APK");

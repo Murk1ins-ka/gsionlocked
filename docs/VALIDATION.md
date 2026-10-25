@@ -1,4 +1,17 @@
-# Validation — 2026-10-24
+# Validation — 2026-10-25
+
+## 0.2.1 model-name restriction removal
+
+- Desktop policy tests accept an arbitrary model and firmware on Android 16 /
+  ARM64, while rejecting Android 15/17 hosts and incompatible architectures.
+- The unknown-device notice does not change the tested-device metadata to claim
+  that another phone has been validated. The ColorOS wrapper no longer checks
+  model/codename, but its host-framework and runtime/image digest checks remain.
+- Android app compilation, native session-helper compilation and APK signature
+  verification passed. The generic EvoX loader source passes C syntax checking;
+  no new device-specific HAL runtime was built or installed.
+- No guest launch or other-phone hardware test was performed for this change.
+  An APK update does not migrate or rebuild a previously prepared runtime.
 
 ## ColorOS launcher — 2026-10-25
 

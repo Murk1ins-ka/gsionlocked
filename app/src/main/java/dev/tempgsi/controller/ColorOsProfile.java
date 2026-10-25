@@ -10,10 +10,10 @@ final class ColorOsProfile {
     static final String NAME="ColorOS 17 · Find X9 Ultra IN";
     static final String SHA256="a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0";
     static boolean matches(String digest){return SHA256.equals(digest);}
-    static boolean guest(){return Build.VERSION.SDK_INT==37;}
+    static boolean guest(){return Build.VERSION.SDK_INT==37&&new File("/data/oneos_genv.sh").isFile();}
     static String command(Context context,String action)throws IOException {
         if(!action.equals("status")&&!action.equals("start")&&!action.equals("start-preserve")&&!action.equals("select"))throw new IOException("Unknown ColorOS action.");
-        if(Build.VERSION.SDK_INT!=36||!"SM-S911B".equals(Build.MODEL))throw new IOException("ColorOS requires the prepared SM-S911B / One UI Android 16 host.");
+        DeviceProfile.requireHost();
         if(action.startsWith("start")){
             KeyguardManager lock=(KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
             if(lock.isDeviceSecure()||lock.isDeviceLocked())throw new IOException("Unlock One UI and disable PIN/password/biometrics before this experimental session.");

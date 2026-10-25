@@ -12,6 +12,15 @@
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
 
+### 0.2.1: model-name restriction removed
+
+Model/codename and bootloader-name allowlists no longer block the app/new loader
+source. The current loader still requires **Android 16 / ARM64**, root and a
+compatible prepared runtime. Other models are **untested**, not universally
+supported. ColorOS still verifies the host framework digest and pinned S23
+runtime/image: another firmware can fail those checks. Updating the APK does
+not rebuild an older installed runtime or supply another phone's adapters.
+
 ### Added: ColorOS 17 / Find X9 Ultra IN
 
 **ColorOS bugs:** [password/PIN does not work](https://github.com/Murk1ins-ka/gsionlocked/issues/6);

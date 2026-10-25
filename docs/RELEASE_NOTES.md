@@ -1,3 +1,14 @@
+# 0.2.1-preview
+
+Removed model/codename and bootloader-name blocks from the app, ColorOS wrapper
+and new EvoX loader source. Other models can use the interface and reach runtime
+preflight. Android 16 / ARM64, image/runtime hashes, credential guards and the
+ColorOS host-framework digest are retained. This does not provide a universal
+runtime or establish compatibility with another device. Existing runtime binaries
+are not rebuilt by an APK update. Untested hosts show an informational notice.
+Native Android 17 phones are no longer identified as a ColorOS guest by SDK alone;
+the guest environment marker must exist too.
+
 # 0.2.0-coloros-preview
 
 Added a separate ColorOS 17 / Find X9 Ultra IN profile alongside EvoX in Select

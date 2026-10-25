@@ -6,7 +6,7 @@ final class LaunchConfirm {
     static void show(Activity activity,java.util.function.Consumer<Boolean> launch){
         final CheckBox[] preserve=new CheckBox[1];android.content.SharedPreferences prefs=activity.getPreferences(0);
         SystemSheet.show(activity,"GSIONLOCKED / ЗАПУСК","Запустить ColorOS?",body->{
-            LinearLayout image=Ui.card(body);Ui.text(image,"ColorOS 17",23,Ui.TEXT);Ui.text(image,"Find X9 Ultra IN · Galaxy S23",14,Ui.MUTED);
+            LinearLayout image=Ui.card(body);Ui.text(image,"ColorOS 17",23,Ui.TEXT);Ui.text(image,"Find X9 Ultra IN · подготовленная среда",14,Ui.MUTED);
             Ui.space(image,12);Ui.text(image,"One UI   →   ColorOS",16,Ui.ACCENT);Ui.text(image,"Адаптивные 120 Гц",13,Ui.MUTED);
             Ui.space(body,8);Ui.text(body,"Сохрани открытые файлы. На время сеанса One UI остановится. Блокировка паролем и биометрия должны быть отключены.",14,Ui.MUTED);
             Ui.space(body,16);LinearLayout back=Ui.card(body);Ui.text(back,"Возврат в One UI",16,Ui.TEXT);Ui.text(back,"Кнопка в приложении или обе кнопки громкости на 3 секунды.",13,Ui.MUTED);

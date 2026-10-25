@@ -19,6 +19,7 @@
   "state": "tested-on-one-device",
   "root": "KernelSU",
   "newer_firmware": "not-tested",
-  "other_devices": "not-supported",
+  "other_devices": "not-tested-requires-device-specific-runtime",
+  "model_name_enforced": false,
   "runtime_bootstrap": "requires-prepared-runtime"
 }

@@ -13,11 +13,12 @@ def main():
         if root: command='su -c '+shlex.quote(command)
         return subprocess.run(base+['shell',command],capture_output=True,text=True,timeout=15)
     profile=json.loads((ROOT/'profiles/dm1q-fzg1.json').read_text())
-    facts={key:shell('getprop '+prop).stdout.strip() for key,prop in [('model','ro.product.model'),('firmware','ro.build.PDA'),('sdk','ro.build.version.sdk')]}
+    facts={key:shell('getprop '+prop).stdout.strip() for key,prop in [('model','ro.product.model'),('firmware','ro.build.PDA'),('sdk','ro.build.version.sdk'),('abi','ro.product.cpu.abilist64')]}
     compatible=facts['model']==profile['model'] and facts['firmware']==profile['firmware'] and facts['sdk']==str(profile['host_sdk'])
     print(json.dumps({'device':facts,'tested_combination':compatible},indent=2))
-    if not compatible:
-        print('No tested profile matches. No changes were made.');return 2
+    if not compatible:print('Untested device/firmware. Model names do not block the launcher; a compatible prepared runtime is still required.')
+    if facts['sdk']!='36' or 'arm64-v8a' not in facts['abi'].split(','):
+        print('Current loader requires Android 16 / arm64-v8a. No changes were made.');return 2
     result=shell('test -f /data/local/tmp/gsionlocked-profile.properties',root=True)
     if result.returncode:
         print('Prepared runtime is absent, or root access was not granted. See docs/SETUP.md.');return 3
