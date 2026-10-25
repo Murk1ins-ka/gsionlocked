@@ -41,9 +41,19 @@ public final class MainActivity extends Activity {
         Ui.space(page,22);TextView title=Ui.heading(page,"gsionlocked");title.setGravity(Gravity.CENTER);title.setLetterSpacing(-.035f);
         Ui.space(page,28);
         LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?(ColorOsProfile.guest()?"ColorOS 17 is running":"EvoX is running"):selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
-        status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"ColorOS 17 added · select your prepared GSI",14,Ui.MUTED);Ui.space(page,8);
+        status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"First setup: import .img → Install runtime → Start",14,Ui.MUTED);Ui.space(page,8);
         if(!inside&&!DeviceProfile.testedHost())Ui.text(card,"Модель не ограничена. На других устройствах запуск не проверен; нужен совместимый подготовленный runtime. Текущий загрузчик: Android 16 / arm64.",12,Ui.MUTED);
         buttons.add(Ui.button(page,"Select GSI",false,this::chooseGsi));
+        if(!inside)buttons.add(Ui.button(page,"Install runtime",false,()->{
+            if(busy)return;
+            SystemSheet.show(this,"GSIONLOCKED / ПОДГОТОВКА","Установить runtime?",body->{
+                Ui.text(body,"Сначала импортируй распакованный .img через Select GSI → Browse. Установщик скачает пакет именно для выбранной системы, проверит SHA-256 и подготовит отдельную среду.",14,Ui.TEXT);
+                Ui.space(body,12);Ui.text(body,"One UI продолжит работать. Прошивка не запускается автоматически. Нужны root, свободное место и совместимый framework хоста; пакет не является универсальным портом для всех телефонов.",14,Ui.MUTED);
+            },"Установить runtime",()->{
+                launchPanel.setVisibility(android.view.View.VISIBLE);synchronized(logText){logText.setLength(0);}
+                task("Preparing runtime…",()->RuntimeInstaller.install(this,selectedSha,this::appendLog,this::isDestroyed));
+            });
+        }));
         buttons.add(Ui.button(page,"Check root",false,()->{if(inside){status.setText("Check root from One UI before launch.");return;}task("Checking root…",()->{String r=RootCommands.run(this,"id");if(!r.contains("uid=0(root)"))throw new IOException("Allow root access in KernelSU.");if(ColorOsProfile.matches(selectedSha))return RootCommands.stream(this,ColorOsProfile.command(this,"status"),this::appendLog,180,()->isDestroyed(),false);return "Root access confirmed.";});}));
         buttons.add(Ui.button(page,"Start",true,()->{
             if(inside){status.setText("A GSI is already running.");return;}
@@ -56,7 +66,7 @@ public final class MainActivity extends Activity {
                 appendLog("SHA-256: "+selectedSha);
                 appendLog("Extracting session-launch from APK");
                 File helper=new File(getFilesDir(),"session-launch");try(InputStream in=getAssets().open("session-launch");FileOutputStream out=new FileOutputStream(helper)){byte[] data=new byte[65536];int n;while((n=in.read(data))!=-1)out.write(data,0,n);}
-                String command="set -ex; test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Runtime is not installed. See docs/SETUP.md.'; exit 12; }; mkdir -p /data/local/tmp/tempgsi-control; cp "+quote(helper.getAbsolutePath())+" /data/local/tmp/tempgsi-control/session-launch; chmod 755 /data/local/tmp/tempgsi-control/session-launch; /data/local/tmp/tempgsi-control/session-launch "+quote(getApplicationInfo().sourceDir)+" "+requested+" --unlimited "+quote(imageSha);
+                String command="set -ex; test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Runtime is not installed. Import .img and tap Install runtime.'; exit 12; }; mkdir -p /data/local/tmp/tempgsi-control; cp "+quote(helper.getAbsolutePath())+" /data/local/tmp/tempgsi-control/session-launch; chmod 755 /data/local/tmp/tempgsi-control/session-launch; /data/local/tmp/tempgsi-control/session-launch "+quote(getApplicationInfo().sourceDir)+" "+requested+" --unlimited "+quote(imageSha);
                 appendLog("Requesting root access");
                 String r=RootCommands.stream(this,command,this::appendLog,45,()->false,false);
                 if(!r.contains("Phone-owned controller PID"))throw new IOException("Launcher did not confirm startup.");
@@ -112,7 +122,7 @@ public final class MainActivity extends Activity {
     private void chooseGsi(){
         if(busy)return;if(inside){status.setText("Select a GSI in OneUI before starting a session.");return;}
         GsiPicker.show(this,selectedSha==null?null:selectedName,()->task("Checking prepared image…",()->{
-                DeviceProfile.requireHost();String result=RootCommands.run(this,"test -f /data/local/tmp/gsionlocked-profile.properties && sha256sum "+DeviceProfile.SOURCE);
+                DeviceProfile.requireHost();String result=RootCommands.run(this,"test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Runtime missing: import .img through Browse files, then tap Install runtime.'; exit 12; }; sha256sum "+DeviceProfile.SOURCE);
                 if(!result.trim().startsWith(DeviceProfile.SHA256+" "))throw new IOException("Prepared EvoX image is missing or differs.");
                 runOnUiThread(()->select("Prepared EvoX 11.11",DeviceProfile.SHA256));return "Prepared EvoX selected.";
             }),()->LaunchConfirm.passwordWarning(this,()->task("Verifying prepared ColorOS image…",()->{
@@ -138,7 +148,7 @@ public final class MainActivity extends Activity {
         synchronized(logText){logText.append(line).append('\n');if(logText.length()>48000)logText.delete(0,logText.length()-48000);}
         ui.post(()->{if(!logUpdatePending&&!isDestroyed()){logUpdatePending=true;ui.postDelayed(renderLog,80);}});
     }
-    private String memoryLabel(){return ColorOsProfile.guest()||ColorOsProfile.matches(selectedSha)?"ColorOS: existing guest storage · 120 Hz":"Storage: "+mib/1024+" GB";}
+    private String memoryLabel(){return ColorOsProfile.guest()||ColorOsProfile.matches(selectedSha)?"ColorOS: separate guest storage · 120 Hz":"Storage: "+mib/1024+" GB";}
     private void chooseMemory(){
         if(busy)return;if(inside){status.setText("Change storage in OneUI before the next launch.");return;}
         if(ColorOsProfile.matches(selectedSha)){status.setText("ColorOS uses its existing prepared data volume. This control resizes EvoX storage only.");return;}

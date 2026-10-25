@@ -1,5 +1,14 @@
 # Setup status
 
+## 0.3.0 installer preview
+
+Use **Select GSI → Browse files → import the matching .img → Install runtime**.
+The app downloads and verifies a separate ColorOS/EvoX package, checks the host
+framework and prepares files without starting a guest. See [runtime installation](RUNTIME_INSTALLER.md).
+Initial packages target the existing S23/FZG1 port and have offline validation;
+fresh installation/boot on hardware is not yet established. This is not an
+automatic port for arbitrary devices. Existing runtime folders are preserved.
+
 ## Already prepared development phone
 
 For **ColorOS 17**, use the separate [ColorOS setup](COLOROS.md). The EvoX
@@ -27,7 +36,10 @@ It does not install a runtime or modify Android. An accepted host platform alone
 is not a complete installation. Model-name restrictions were removed in 0.2.1;
 device-specific adapters and the ColorOS host-framework digest remain required.
 
-A reproducible clean-device bootstrap is still required before this preview can become a public end-user release. It must extract required system files from a user-provided GSI, obtain host/vendor files from that same phone, build the adapters from source, prepare a fresh private data volume and atomically install a complete profile. Publishing an APK does not complete those steps.
+The 0.3.0 installer supplies the curated prepared dependencies as separate,
+hash-pinned runtime archives and copies declared host components locally.
+A fully source-reproducible bootstrap and adapters for arbitrary firmware remain
+separate work. The provided packages are not a phone userdata snapshot.
 
 ## GSI input
 

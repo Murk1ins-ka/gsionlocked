@@ -23,7 +23,7 @@
 | Newer OneUI firmware | Not tested; name-based block removed in 0.2.1, Android 16 / ARM64 and compatible runtime still required |
 | S23+, S23 Ultra, other regional S23 models | Not tested; model-name block removed in 0.2.1, device-specific runtime still required |
 | Arbitrary third-party GSI | Import/identification only; launch requires a matching port |
-| APK-only installation on a clean phone | Not available in this source preview |
+| Fresh runtime installation | 0.3.0 downloads curated runtime archives after raw-image import; offline tests passed, fresh physical-device installation and boot remain untested. Initial archives require the matching S23/FZG1 host framework |
 
 Changing this table or removing a model check does not create compatibility. Validate vendor ABI, service identities, display/input ownership, watchdog restoration, storage namespace, SELinux restoration and hardware on each new combination.
 

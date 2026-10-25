@@ -24,10 +24,11 @@ final class GsiPicker {
         Ui.space(body,12);TextView title=Ui.text(body,"Select GSI",25,Ui.TEXT);title.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));
         TextView current=Ui.text(body,selected==null?"No image selected":"Selected: "+selected,13,Ui.MUTED);current.setMaxLines(2);current.setEllipsize(android.text.TextUtils.TruncateAt.END);Ui.space(body,22);
 
-        LinearLayout existing=Ui.card(body);row(existing,activity,"Prepared EvoX","Android 16 · Galaxy S23",true);
+        Ui.text(body,"Первый запуск: Browse files → импорт .img → Установить runtime → Start.",13,Ui.MUTED);Ui.space(body,12);
+        LinearLayout existing=Ui.card(body);row(existing,activity,"Prepared EvoX","Android 16 · установленный runtime",true);
         Ui.button(existing,"Use prepared image",true,()->{dialog.dismiss();prepared.run();});
         Ui.space(body,6);
-        LinearLayout color=Ui.card(body);row(color,activity,"ColorOS 17","Find X9 Ultra IN · Galaxy S23",true);
+        LinearLayout color=Ui.card(body);row(color,activity,"ColorOS 17","Find X9 Ultra IN · установленный runtime",true);
         Ui.text(color,"Prepared runtime required · 120 Hz",13,Ui.MUTED);
         Ui.button(color,"Use prepared ColorOS",true,()->{dialog.dismiss();coloros.run();});
         Ui.space(body,6);

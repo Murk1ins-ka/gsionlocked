@@ -1,0 +1,22 @@
+{
+  "coloros": {
+    "file": "gsionlocked-runtime-coloros-1.zip",
+    "bytes": 555545955,
+    "sha256": "bd7dd8f68ff0338f8ecd01122f019b150717540c81f95582f8d301ecbf7629cc",
+    "gsi_sha256": "a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0",
+    "unpacked_bytes": 1093473058,
+    "files": 64,
+    "host_framework_sha256": "86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3",
+    "url": "https://github.com/Murk1ins-ka/gsionlocked/releases/download/v0.3.0-runtime-preview/gsionlocked-runtime-coloros-1.zip"
+  },
+  "evox": {
+    "file": "gsionlocked-runtime-evox-1.zip",
+    "bytes": 254687182,
+    "sha256": "8e54ec1bf798f6e57e661fe22614516696049959145c120c9ad967a9d4584c35",
+    "gsi_sha256": "5e8333e15798592bae059bcb78ba85394418afc8f035a13fc0e97c086b8c1e49",
+    "unpacked_bytes": 600926392,
+    "files": 1124,
+    "host_framework_sha256": "86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3",
+    "url": "https://github.com/Murk1ins-ka/gsionlocked/releases/download/v0.3.0-runtime-preview/gsionlocked-runtime-evox-1.zip"
+  }
+}

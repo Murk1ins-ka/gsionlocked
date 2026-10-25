@@ -1,5 +1,18 @@
 # Validation — 2026-10-25
 
+## 0.3.0 runtime installer — offline
+
+- APK compilation and signing passed. Both authenticated runtime ZIPs were
+  checked using the application's Java parser: EvoX has 1124 files, ColorOS 64.
+- Desktop tests cover archive and image integrity, unsafe paths, host-copy
+  restrictions, existing-runtime preservation and rollback after publication failure.
+- Filesystem transaction tests exercise both layouts with fixture host files;
+  they do not establish Android permissions or hardware compatibility.
+- At the owner's request no phone was used. Fresh physical-device installation,
+  download through the Android app and subsequent boot are not yet verified.
+- Initial archives require the pinned S23/FZG1 host framework; removing model-name
+  checks does not make these runtime archives compatible with every phone.
+
 ## 0.2.1 model-name restriction removal
 
 - Desktop policy tests accept an arbitrary model and firmware on Android 16 /

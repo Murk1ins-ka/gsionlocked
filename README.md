@@ -12,6 +12,15 @@
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
 
+### 0.3.0: ColorOS and Evolution X runtime installer
+
+First setup: **Select GSI → Browse files → import the unpacked .img → Install
+runtime → Start**. The APK downloads a separate hash-pinned package and prepares
+the environment without starting a guest. See [installation and limits](docs/RUNTIME_INSTALLER.md).
+Initial packages target the existing S23/FZG1 port. They do not create universal
+device compatibility. The new installer has offline tests; a fresh hardware
+installation and guest boot have not yet been validated.
+
 ### 0.2.1: model-name restriction removed
 
 Model/codename and bootloader-name allowlists no longer block the app/new loader

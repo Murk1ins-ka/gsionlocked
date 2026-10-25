@@ -1,3 +1,13 @@
+# 0.3.0-runtime-preview
+
+Added **Install runtime** for the exact supported ColorOS/EvoX images. The APK
+downloads a pinned package, verifies every file, checks the host ABI framework,
+copies declared host components locally and publishes a prepared environment.
+No guest is automatically launched. Existing runtime directories are preserved.
+Offline archive/filesystem/rollback tests pass; a fresh physical-device install
+and subsequent boot have not been tested. Initial packages target the existing
+S23/FZG1 port, not arbitrary devices. See [installer](RUNTIME_INSTALLER.md).
+
 # 0.2.1-preview
 
 Removed model/codename and bootloader-name blocks from the app, ColorOS wrapper
