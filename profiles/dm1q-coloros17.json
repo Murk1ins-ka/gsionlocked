@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "id": "dm1q-coloros17-x9u-in",
+  "model": "SM-S911B",
+  "device": "dm1q",
+  "host_sdk": 36,
+  "host_services_sha256": "86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3",
+  "gsi": {
+    "name": "ColorOS 17 / Find X9 Ultra IN",
+    "file": "OneOS_ColorOS17_FindX9Ultra_IN.img",
+    "sha256": "a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0",
+    "bytes": 12069945344,
+    "format": "raw-ext4",
+    "sdk": 37
+  },
+  "runtime": {
+    "stage": "/data/local/tmp/oneos",
+    "manifest_sha256": "ee27c99f9f6d47885f7aff52c6341bea655751586ab51339f581140b951f1f0f",
+    "bootstrap": "requires-prepared-runtime",
+    "return_mode": "reboot"
+  },
+  "state": "experimental-tested-on-one-device",
+  "aod": "disabled",
+  "refresh_rate_max_hz": 120,
+  "credentials_and_biometrics": "unsupported"
+}

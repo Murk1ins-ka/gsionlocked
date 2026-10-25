@@ -12,6 +12,29 @@
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
 
+### Added: ColorOS 17 / Find X9 Ultra IN
+
+Version **0.2.0-coloros-preview** keeps the existing interface and adds a separate
+ColorOS card to **Select GSI**, alongside EvoX and raw-image import. The ColorOS
+launcher verifies its own prepared S23 runtime and image digest, shows launch
+output, and offers **Return to One UI** inside the guest. Its return path reboots;
+hold both volume keys for three seconds as an alternate return request.
+
+ColorOS uses `OneOS_ColorOS17_FindX9Ultra_IN.img`, Android 17 / SDK 37,
+**12,069,945,344 bytes**, raw ext4. SHA-256:
+
+```text
+a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0
+```
+
+The prepared ColorOS profile disables AOD at startup and preserves adaptive
+refresh up to 120 Hz. Firefox download, DocumentsUI file selection/local upload,
+MediaStore storage roundtrips and Open Camera JPEG saving were tested on the
+development S23. PIN, fingerprint and face unlock are **unsupported in ColorOS**;
+the EvoX results below do not apply to it. See [ColorOS setup and limitations](docs/COLOROS.md)
+and [profile metadata](profiles/dm1q-coloros17.json). The image is not redistributed.
+Installing/importing the APK/image alone does not prepare a new phone.
+
 Run a prepared Generic System Image, such as Evolution X / Android 16, over stock OneUI using the running Samsung kernel. The tested path starts a separate Android userspace without flashing physical system partitions or performing a cold kernel reboot.
 
 ### How it works

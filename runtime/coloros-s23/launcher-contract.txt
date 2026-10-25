@@ -1,0 +1,5 @@
+Prepared runtime: /data/local/tmp/oneos
+Guest return request: /data/local/tmp/oneos/data/user/0/dev.tempgsi.controller/files/oneos_return
+Return mode: reboot
+AOD: disabled by fix-s23-daily-use.sh on each start
+Refresh: adaptive, maximum 120 Hz

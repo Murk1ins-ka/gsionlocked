@@ -12,7 +12,7 @@ import android.view.WindowManager;
 import android.widget.*;
 
 final class GsiPicker {
-    static void show(Activity activity,String selected,Runnable prepared,Runnable browse){
+    static void show(Activity activity,String selected,Runnable prepared,Runnable coloros,Runnable browse){
         Dialog dialog=new Dialog(activity);dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ScrollView scroll=new ScrollView(activity);scroll.setVerticalScrollBarEnabled(false);scroll.setClipToPadding(false);
         LinearLayout body=new LinearLayout(activity);body.setOrientation(LinearLayout.VERTICAL);
@@ -26,6 +26,10 @@ final class GsiPicker {
 
         LinearLayout existing=Ui.card(body);row(existing,activity,"Prepared EvoX","Android 16 · Galaxy S23",true);
         Ui.button(existing,"Use prepared image",true,()->{dialog.dismiss();prepared.run();});
+        Ui.space(body,6);
+        LinearLayout color=Ui.card(body);row(color,activity,"ColorOS 17","Find X9 Ultra IN · Galaxy S23",true);
+        Ui.text(color,"Prepared runtime required · 120 Hz",13,Ui.MUTED);
+        Ui.button(color,"Use prepared ColorOS",true,()->{dialog.dismiss();coloros.run();});
         Ui.space(body,6);
         LinearLayout file=Ui.card(body);row(file,activity,"Image file","Import a raw ext4 .img",false);
         Ui.button(file,"Browse files",false,()->{dialog.dismiss();browse.run();});

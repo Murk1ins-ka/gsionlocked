@@ -70,6 +70,40 @@ public final class BootLogOverlay {
         }catch(Exception ignored){}
         return pids;
     }
+    static boolean bootAnimationStarted(){
+        File[] entries=new File("/proc").listFiles();if(entries==null)return false;
+        for(File entry:entries){
+            if(!entry.getName().matches("[0-9]+"))continue;
+            try(BufferedReader in=new BufferedReader(new FileReader(new File(entry,"comm")))){
+                String name=in.readLine();if("bootanimation".equals(name)||"bootanim".equals(name))return true;
+            }catch(IOException ignored){}
+        }
+        return false;
+    }
+    static void refreshHostProgress(){
+        File progress=new File("/data/local/tmp/oneos/takeover-s23-launcher.log");
+        try(RandomAccessFile file=new RandomAccessFile(progress,"r")){
+            long length=file.length();file.seek(Math.max(0,length-16000));byte[] data=new byte[(int)Math.min(16000,length)];file.readFully(data);
+            String[] recent=new String(data,"UTF-8").split("\n");
+            synchronized(BootLogOverlay.class){
+                lines.clear();lines.addLast("gsionlocked // запуск ColorOS 17");
+                for(int index=Math.max(0,recent.length-42);index<recent.length;index++){
+                    String line=recent[index];for(int start=0;start<line.length();start+=96)lines.addLast(line.substring(start,Math.min(start+96,line.length())));
+                }
+                while(lines.size()>ROWS)lines.removeFirst();
+            }
+        }catch(IOException ignored){}
+    }
+    static Bitmap loadWallpaper(){
+        String classpath=System.getenv("CLASSPATH");
+        if(classpath!=null)for(String file:classpath.split(":")){
+            try(java.util.zip.ZipFile apk=new java.util.zip.ZipFile(file)){
+                java.util.zip.ZipEntry entry=apk.getEntry("assets/boot-wallpaper.png");
+                if(entry!=null)try(InputStream input=apk.getInputStream(entry)){Bitmap image=BitmapFactory.decodeStream(input);if(image!=null)return image;}
+            }catch(IOException ignored){}
+        }
+        return BitmapFactory.decodeFile("/data/local/tmp/gsionlocked-wallpaper.png");
+    }
     public static void main(String[] args){
         try{run(args);}catch(Throwable error){
             error.printStackTrace();
@@ -86,17 +120,24 @@ public final class BootLogOverlay {
         if(args.length==1&&args[0].equals("--check-api")){
             System.out.println("PRIVATE_PHONE_LOG_LAYER_API_AND_FONTS_AVAILABLE");return;
         }
-        if(args.length!=0)throw new IllegalArgumentException("Unexpected arguments");
-        journal=new PrintWriter(new OutputStreamWriter(new FileOutputStream("/data/local/tmp/phone-boot.log",true),"UTF-8"));
-        append("gsionlocked // запуск EvoX");
+        boolean preview=args.length==1&&args[0].equals("--preview-host");
+        boolean host=preview||args.length==1&&args[0].equals("--host-coloros");
+        boolean coloros=host||args.length==1&&args[0].equals("--coloros");
+        if(args.length!=0&&!coloros)throw new IllegalArgumentException("Unexpected arguments");
+        journal=new PrintWriter(new OutputStreamWriter(new FileOutputStream(host?"/data/local/tmp/gsionlocked-host-boot.log":"/data/local/tmp/phone-boot.log",true),"UTF-8"));
+        append("gsionlocked // запуск "+(coloros?"ColorOS 17":"EvoX"));
+        if(coloros&&bootAnimationStarted()){
+            append("OPPO boot animation started; startup layer not shown");journal.close();return;
+        }
         append("Private Binder / temporary data; waiting for GSI SurfaceFlinger");
         Class<?> manager=Class.forName("android.os.ServiceManager");
         Method check=manager.getMethod("checkService",String.class);
         IBinder sf=null;
         for(int tries=0;tries<100&&sf==null;tries++){sf=(IBinder)check.invoke(null,"SurfaceFlinger");if(sf==null)Thread.sleep(250);}
         if(sf==null)throw new IllegalStateException("Private SurfaceFlinger not ready");
-        privatePids=scanPrivatePids();
-        Process capture=new ProcessBuilder("/system/bin/logcat","-b","main","-b","system","-b","crash","-v","threadtime","-T","1").redirectErrorStream(true).start();
+        privatePids=host?Collections.emptySet():scanPrivatePids();
+        Process capture=host?null:new ProcessBuilder("/system/bin/logcat","-b","main","-b","system","-b","crash","-v","threadtime","-T","1").redirectErrorStream(true).start();
+        if(!host){
         Thread reader=new Thread(()->{
             try(BufferedReader input=new BufferedReader(new InputStreamReader(capture.getInputStream(),"UTF-8"))){
                 String line;while((line=input.readLine())!=null){Matcher match=PID.matcher(line);
@@ -104,6 +145,7 @@ public final class BootLogOverlay {
                 }
             }catch(Exception error){append("Log reader: "+error);}
         },"GsiBootLogReader");reader.setDaemon(true);reader.start();
+        }
         Object layer=null,queue=null,transaction=null;Surface surface=null;
         try {
             Object builder=BUILDER.getConstructor().newInstance();
@@ -119,12 +161,16 @@ public final class BootLogOverlay {
             TRANSACTION.getMethod("show",SC).invoke(transaction,layer);TRANSACTION.getMethod("apply").invoke(transaction);
             Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);paint.setTypeface(Typeface.MONOSPACE);paint.setTextSize(21);
             append("Graphics buffer, allocator and private display connected");
-            Bitmap wallpaper=BitmapFactory.decodeFile("/data/local/tmp/gsionlocked-wallpaper.png");
+            Bitmap wallpaper=loadWallpaper();
             RectF wallpaperBounds=new RectF(0,0,WIDTH,HEIGHT);
             if(wallpaper!=null){float scale=Math.max((float)WIDTH/wallpaper.getWidth(),(float)HEIGHT/wallpaper.getHeight());float w=wallpaper.getWidth()*scale,h=wallpaper.getHeight()*scale;wallpaperBounds.set((WIDTH-w)/2,(HEIGHT-h)/2,(WIDTH+w)/2,(HEIGHT+h)/2);}
             boolean visible=true,bootRecorded=false;
-            for(int frame=0;frame<320;frame++){
-                if(frame%4==0)privatePids=scanPrivatePids();
+            for(int frame=0;frame<(preview?20:host?1200:320);frame++){
+                if(coloros&&bootAnimationStarted()){
+                    append("OPPO boot animation started; startup layer closed");break;
+                }
+                if(host)refreshHostProgress();
+                else if(frame%4==0)privatePids=scanPrivatePids();
                 if(visible){Canvas canvas=surface.lockCanvas(null);
                 try {
                     canvas.drawColor(Color.BLACK);
@@ -140,7 +186,7 @@ public final class BootLogOverlay {
                 if(frame==0)System.out.println("PRIVATE_PHONE_BOOT_LOG_FIRST_FRAME_POSTED");
                 // Give SystemUI the whole display once the actual guest reports boot completion.
                 String completed=(String)Class.forName("android.os.SystemProperties").getMethod("get",String.class).invoke(null,"sys.boot_completed");
-                if("1".equals(completed)&&!bootRecorded){
+                if(!host&&"1".equals(completed)&&!bootRecorded){
                     bootRecorded=true;append("Guest boot completed; stopping startup log collector");
                     if(visible){TRANSACTION.getMethod("hide",SC).invoke(transaction,layer);TRANSACTION.getMethod("apply").invoke(transaction);visible=false;}
                 }
@@ -148,7 +194,7 @@ public final class BootLogOverlay {
                 Thread.sleep(250);
             }
         }finally{
-            capture.destroy();
+            if(capture!=null)capture.destroy();
             if(transaction!=null&&layer!=null){TRANSACTION.getMethod("hide",SC).invoke(transaction,layer);TRANSACTION.getMethod("apply").invoke(transaction);}
             if(surface!=null)surface.release();if(queue!=null)BLAST.getMethod("destroy").invoke(queue);if(layer!=null)SC.getMethod("release").invoke(layer);
             if(transaction instanceof AutoCloseable)((AutoCloseable)transaction).close();journal.close();

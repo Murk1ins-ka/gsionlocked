@@ -38,8 +38,10 @@ def main():
     for name in ['classes', 'dex', 'assets']:
         (build/name).mkdir(parents=True, exist_ok=True)
     src = ROOT / 'app/src/main'
+    if (src/'assets').is_dir():
+        shutil.copytree(src/'assets',build/'assets',dirs_exist_ok=True)
     run(clang, '--target=aarch64-linux-android33', '-fuse-ld=lld', '-static', '-O2', '-Wall', '-Wextra', '-Werror', src/'session_launch.c', '-o', build/'assets/session-launch')
-    run(java/('javac'+exe), '-encoding', 'UTF-8', '-source', '8', '-target', '8', '-cp', android, '-d', build/'classes', *sorted((src/'java').rglob('*.java')))
+    run(java/('javac'+exe), '-encoding', 'UTF-8', '-source', '8', '-target', '8', '-cp', android, '-d', build/'classes', *sorted((src/'java').rglob('*.java')), ROOT/'runtime/dm1q/src/BootLogOverlay.java')
     run(java/('java'+exe), '-cp', tools/'lib/d8.jar', 'com.android.tools.r8.D8', '--min-api', '31', '--lib', android, '--output', build/'dex', *sorted((build/'classes').rglob('*.class')))
     run(tools/('aapt'+exe), 'package', '-f', '-M', src/'AndroidManifest.xml', '-S', src/'res', '-A', build/'assets', '-I', android, '-F', build/'unsigned.apk')
     with zipfile.ZipFile(build/'unsigned.apk', 'a') as apk:

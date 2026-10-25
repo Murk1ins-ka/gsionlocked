@@ -1,5 +1,7 @@
 # Compatibility
 
+## EvoX / Android 16
+
 | Component | Evidence |
 | --- | --- |
 | SM-S911B / dm1q / OneUI S911BXXSAFZG1 | One physical development device tested |
@@ -26,3 +28,23 @@
 Changing this table or removing a model check does not create compatibility. Validate vendor ABI, service identities, display/input ownership, watchdog restoration, storage namespace, SELinux restoration and hardware on each new combination.
 
 Background on the GSI/vendor-interface relationship: [AOSP GSI documentation](https://source.android.com/docs/core/tests/vts/gsi).
+
+## ColorOS 17 / Find X9 Ultra IN
+
+These results concern the separate prepared SM-S911B takeover, not the EvoX
+runtime or a clean-device installation. See [profile](../profiles/dm1q-coloros17.json).
+
+| Component | Evidence / limitation |
+| --- | --- |
+| Boot, display and touch | Guest desktop visible and touch confirmed by owner |
+| Refresh and AOD | Peak 120 Hz, adaptive minimum; AOD explicitly disabled at each startup |
+| Storage | Non-root app external-file and MediaStore image/download roundtrips passed |
+| Firefox files | Actual browser download, system picker and local multipart upload passed; exact test contents verified |
+| Photos | Two Open Camera JPEGs saved at 4080×3060; all four camera previews checked earlier, complete per-lens capture matrix pending |
+| Audio | Owner confirmed sound; complete audio/microphone matrix pending |
+| Bluetooth | Redmi 9C discovery/pairing checked; Bluetooth audio not fully verified |
+| Calls / SMS | Owner confirmed calls; incoming operator SMS remains unresolved |
+| PIN, fingerprint, face unlock | Unsupported; credential guards retained, do not enroll |
+| SELinux | Guest still experimental/Permissive; full enforcing policy not completed |
+| Temperature | Battery 36.8 °C, thermal status 0 after short camera test; endurance and sustained load not verified |
+| Other devices / arbitrary GSI | Unsupported; prepared runtime required |

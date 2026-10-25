@@ -1,3 +1,25 @@
+# 0.2.0-coloros-preview
+
+Added a separate ColorOS 17 / Find X9 Ultra IN profile alongside EvoX in Select
+GSI, preserving the existing gsionlocked interface. Includes matching-host/runtime
+checks, complete image SHA-256 verification, dedicated native launch, a styled
+confirmation sheet, a screen-lock warning at selection, and a guest return button.
+The optional root-preserving return remains experimental with reboot fallback.
+Native startup logs close at the OPPO animation. AOD is disabled by the prepared
+runtime and its status label is omitted from the interface; adaptive 120 Hz stays.
+
+Exact GSI: `OneOS_ColorOS17_FindX9Ultra_IN.img`, Android 17 / SDK 37, raw ext4,
+12,069,945,344 bytes. SHA-256:
+
+```text
+a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0
+```
+
+The image and private prepared runtime are not included. This APK requires the
+matching prepared SM-S911B environment. Importing a GSI does not build a port.
+ColorOS PIN/fingerprint/face unlock remain unsupported and incoming operator SMS
+is unresolved. EvoX compatibility results are separate. See [ColorOS](COLOROS.md).
+
 # v0.1.1-preview
 
 Initial public source preview for gsionlocked.

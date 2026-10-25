@@ -27,10 +27,10 @@ public final class MainActivity extends Activity {
     private boolean busy,inside;
     private int mib;
     private static String quote(String s){return "'"+s.replace("'","'\\''")+"'";}
-    private boolean guest(){try{return Class.forName("android.os.ServiceManager").getMethod("checkService",String.class).invoke(null,"tempgsi.control")!=null;}catch(Exception e){return false;}}
+    private boolean guest(){if(ColorOsProfile.guest())return true;try{return Class.forName("android.os.ServiceManager").getMethod("checkService",String.class).invoke(null,"tempgsi.control")!=null;}catch(Exception e){return false;}}
     private void task(String pending,Callable<String> action){
         if(busy)return;busy=true;for(Button b:buttons)b.setEnabled(false);status.setText(pending);
-        worker.execute(()->{String text;try{text=action.call();}catch(Exception e){text=e.getMessage()==null?"Action failed.":e.getMessage();if(launchActive)appendLog("ERROR: "+text);}final String result=text;
+        worker.execute(()->{String text;try{text=action.call();}catch(Exception e){text=e.getMessage()==null?"Action failed.":e.getMessage();if(launchActive)appendLog("ERROR: "+text);String[] lines=text.trim().split("\n");text=lines[lines.length-1];if(text.length()>240)text=text.substring(0,240);}final String result=text;
             runOnUiThread(()->{if(isFinishing()||isDestroyed())return;busy=false;for(Button b:buttons)b.setEnabled(true);status.setText(result);});});
     }
     @Override public void onCreate(Bundle state){
@@ -40,12 +40,13 @@ public final class MainActivity extends Activity {
         logo.setBackground(Ui.shape(this,android.graphics.Color.BLACK,36));logo.setClipToOutline(true);logo.setElevation(Ui.dp(this,6));
         Ui.space(page,22);TextView title=Ui.heading(page,"gsionlocked");title.setGravity(Gravity.CENTER);title.setLetterSpacing(-.035f);
         Ui.space(page,28);
-        LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?"EvoX is running":selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
-        status=Ui.text(card,inside?"Hold both volume buttons for 2 seconds to return to OneUI.":"Ready",14,Ui.MUTED);Ui.space(page,8);
+        LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?(ColorOsProfile.guest()?"ColorOS 17 is running":"EvoX is running"):selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
+        status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"ColorOS 17 added · select your prepared GSI",14,Ui.MUTED);Ui.space(page,8);
         buttons.add(Ui.button(page,"Select GSI",false,this::chooseGsi));
-        buttons.add(Ui.button(page,"Check root",false,()->task("Checking root…",()->{String r=RootCommands.run(this,"id");if(!r.contains("uid=0(root)"))throw new IOException("Allow root access in KernelSU.");return "Root access confirmed.";})));
+        buttons.add(Ui.button(page,"Check root",false,()->{if(inside){status.setText("Check root from One UI before launch.");return;}task("Checking root…",()->{String r=RootCommands.run(this,"id");if(!r.contains("uid=0(root)"))throw new IOException("Allow root access in KernelSU.");if(ColorOsProfile.matches(selectedSha))return RootCommands.stream(this,ColorOsProfile.command(this,"status"),this::appendLog,180,()->isDestroyed(),false);return "Root access confirmed.";});}));
         buttons.add(Ui.button(page,"Start",true,()->{
-            if(inside){status.setText("EvoX is already running.");return;}
+            if(inside){status.setText("A GSI is already running.");return;}
+            if(ColorOsProfile.matches(selectedSha)){confirmColorOs();return;}
             if(busy)return;if(selectedSha==null){status.setText("Select a GSI first.");return;}launchActive=true;sessionExit=null;sessionError=null;synchronized(logText){logText.setLength(0);}launchPanel.setVisibility(android.view.View.VISIBLE);launchPanel.post(()->launchPanel.requestRectangleOnScreen(new android.graphics.Rect(0,0,launchPanel.getWidth(),launchPanel.getHeight()),false));
             final int requested=mib;final String imageSha=selectedSha;task("Starting…",()->{
                 DeviceProfile.requireHost();
@@ -66,6 +67,7 @@ public final class MainActivity extends Activity {
                 return "Session launched. Output: /data/local/tmp/tempgsi-control/latest.log";
             });
         }));
+        if(ColorOsProfile.guest())buttons.add(Ui.button(page,"Return to One UI",true,()->new AlertDialog.Builder(this).setTitle("Return to One UI?").setMessage("Save open files. The guardian will restore One UI; it may reboot if required.").setNegativeButton("Cancel",null).setPositiveButton("Return",(d,w)->{try{ColorOsProfile.requestReturn(this);status.setText("Return requested. If needed, hold both volume keys for 3 seconds.");}catch(IOException e){status.setText(e.getMessage());}}).show()));
         buttons.add(Ui.button(page,"Storage",false,this::chooseMemory));Ui.space(page,18);
         TextView channel=Ui.text(page,"t.me/gsionlocked",14,Ui.TEXT);channel.setGravity(Gravity.CENTER);channel.setPaintFlags(channel.getPaintFlags()|android.graphics.Paint.UNDERLINE_TEXT_FLAG);channel.setPadding(0,Ui.dp(this,12),0,Ui.dp(this,12));channel.setMinHeight(Ui.dp(this,48));channel.setContentDescription("Open gsionlocked Telegram channel");channel.setOnClickListener(v->{try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://t.me/gsionlocked")));}catch(android.content.ActivityNotFoundException e){status.setText("Install Telegram or a browser to open this link.");}});
         launchPanel=Ui.card(page);Ui.text(launchPanel,"Launch output",14,Ui.TEXT);
@@ -77,6 +79,22 @@ public final class MainActivity extends Activity {
     private void select(String name,String sha){
         selectedName=name;selectedSha=sha;getPreferences(0).edit().putString("gsi_name",name).putString("gsi_sha256",sha).apply();
         imageLabel.setText(name);
+        memory.setText(memoryLabel());
+    }
+    private void confirmColorOs(){
+        if(busy)return;
+        LaunchConfirm.show(this,preserveRoot->{
+                launchActive=true;sessionExit=null;sessionError=null;
+                synchronized(logText){logText.setLength(0);}launchPanel.setVisibility(android.view.View.VISIBLE);
+                task("Checking ColorOS runtime…",()->{
+                    appendLog("Selected GSI: "+ColorOsProfile.NAME);appendLog("SHA-256: "+ColorOsProfile.SHA256);
+                    String result=RootCommands.stream(this,ColorOsProfile.command(this,preserveRoot?"start-preserve":"start"),this::appendLog,180,()->false,false);
+                    if(!result.contains("COLOROS_START_DISPATCHED="))throw new IOException("ColorOS launcher did not confirm dispatch.");
+                    String follow="timeout 90 /system/bin/tail -n +1 -f /data/local/tmp/oneos/takeover-s23-launcher.log";
+                    RootCommands.stream(this,follow,this::appendLog,95,()->!visible,true);
+                    return "ColorOS launch dispatched. See the on-screen boot log.";
+                });
+            });
     }
     private void chooseGsi(){
         if(busy)return;if(inside){status.setText("Select a GSI in OneUI before starting a session.");return;}
@@ -84,7 +102,11 @@ public final class MainActivity extends Activity {
                 DeviceProfile.requireHost();String result=RootCommands.run(this,"test -f /data/local/tmp/gsionlocked-profile.properties && sha256sum "+DeviceProfile.SOURCE);
                 if(!result.trim().startsWith(DeviceProfile.SHA256+" "))throw new IOException("Prepared EvoX image is missing or differs.");
                 runOnUiThread(()->select("Prepared EvoX 11.11",DeviceProfile.SHA256));return "Prepared EvoX selected.";
-            }),()->{android.content.Intent pick=new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(android.content.Intent.CATEGORY_OPENABLE);pick.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(pick,PICK_GSI);});
+            }),()->LaunchConfirm.passwordWarning(this,()->task("Verifying prepared ColorOS image…",()->{
+                String result=RootCommands.stream(this,ColorOsProfile.command(this,"select"),this::appendLog,240,()->isDestroyed(),false);
+                if(!result.contains("COLOROS_IMAGE_VERIFIED"))throw new IOException("ColorOS verification did not complete.");
+                runOnUiThread(()->select(ColorOsProfile.NAME,ColorOsProfile.SHA256));return "ColorOS selected · 120 Hz";
+            })),()->{android.content.Intent pick=new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(android.content.Intent.CATEGORY_OPENABLE);pick.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(pick,PICK_GSI);});
     }
     @Override protected void onActivityResult(int request,int result,android.content.Intent data){
         super.onActivityResult(request,result,data);if(request!=PICK_GSI||result!=RESULT_OK||data==null||data.getData()==null)return;
@@ -93,7 +115,7 @@ public final class MainActivity extends Activity {
         task("Importing GSI…",()->{
             GsiStore.Image image=GsiStore.read(this,uri,this::appendLog,this::isDestroyed);
             runOnUiThread(()->select(image.name,image.sha256));
-            return DeviceProfile.SHA256.equals(image.sha256)?"Image matches the tested EvoX profile.":"Image imported. No tested runtime profile supports this image yet.";
+            return ColorOsProfile.matches(image.sha256)?"ColorOS image recognized. A matching prepared ColorOS runtime is required; import alone does not install it.":DeviceProfile.SHA256.equals(image.sha256)?"Image matches the tested EvoX profile.":"Image imported. No tested runtime profile supports this image yet.";
         });
     }
     private void appendLog(String line){
@@ -103,9 +125,10 @@ public final class MainActivity extends Activity {
         synchronized(logText){logText.append(line).append('\n');if(logText.length()>48000)logText.delete(0,logText.length()-48000);}
         ui.post(()->{if(!logUpdatePending&&!isDestroyed()){logUpdatePending=true;ui.postDelayed(renderLog,80);}});
     }
-    private String memoryLabel(){return "Storage: "+mib/1024+" GB";}
+    private String memoryLabel(){return ColorOsProfile.guest()||ColorOsProfile.matches(selectedSha)?"ColorOS: existing guest storage · 120 Hz":"Storage: "+mib/1024+" GB";}
     private void chooseMemory(){
         if(busy)return;if(inside){status.setText("Change storage in OneUI before the next launch.");return;}
+        if(ColorOsProfile.matches(selectedSha)){status.setText("ColorOS uses its existing prepared data volume. This control resizes EvoX storage only.");return;}
         LinearLayout body=new LinearLayout(this);body.setOrientation(1);int pad=Ui.dp(this,24);body.setPadding(pad,pad,pad,0);
         TextView note=new TextView(this);note.setText("Space for EvoX apps and files, in GB. Increasing it keeps existing data. Allocated storage cannot be reduced.");note.setTextColor(Ui.MUTED);note.setTextSize(15);body.addView(note);
         EditText input=new EditText(this);input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);input.setSingleLine(true);input.setSelectAllOnFocus(true);input.setText(Integer.toString(mib/1024));input.setTextColor(Ui.TEXT);body.addView(input,new LinearLayout.LayoutParams(-1,Ui.dp(this,64)));
