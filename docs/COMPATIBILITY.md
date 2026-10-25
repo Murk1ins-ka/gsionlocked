@@ -43,8 +43,8 @@ runtime or a clean-device installation. See [profile](../profiles/dm1q-coloros17
 | Photos | Two Open Camera JPEGs saved at 4080×3060; all four camera previews checked earlier, complete per-lens capture matrix pending |
 | Audio | Owner confirmed sound; complete audio/microphone matrix pending |
 | Bluetooth | Redmi 9C discovery/pairing checked; Bluetooth audio not fully verified |
-| Calls / SMS | Owner confirmed calls; incoming operator SMS remains unresolved |
-| PIN, fingerprint, face unlock | Unsupported; credential guards retained, do not enroll |
+| Calls / SMS | Owner confirmed calls; incoming SMS and Google codes may not arrive: [ColorOS #7](https://github.com/Murk1ins-ka/gsionlocked/issues/7); exact cause unresolved |
+| PIN/password, fingerprint, face unlock | Password/PIN does not work: [ColorOS #6](https://github.com/Murk1ins-ka/gsionlocked/issues/6); biometrics unsupported, credential guards retained, do not enroll |
 | SELinux | Guest still experimental/Permissive; full enforcing policy not completed |
 | Temperature | Battery 36.8 °C, thermal status 0 after short camera test; endurance and sustained load not verified |
 | Other devices / arbitrary GSI | Unsupported; prepared runtime required |

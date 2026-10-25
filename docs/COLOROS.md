@@ -5,8 +5,10 @@ backend: selecting it never invokes the EvoX loader or resizes EvoX storage.
 The input is the exact Find X9 Ultra **IN** image in
 [profile metadata](../profiles/dm1q-coloros17.json), not an interchangeable CN image.
 Its source project is [OneOS](https://github.com/fahadalijaved23/OneOS).
-No GSI download URL for this exact IN file is asserted here; use the matching
-user-provided raw image and verify its digest. The image is not a release asset.
+The matching user-provided image is available as a compressed, split archive in
+the [release downloads](GSI_DOWNLOADS.md). Verify its digest after extraction.
+The image is separate from the APK/source archive and does not contain the
+prepared per-device runtime.
 
 ## Prepared phone
 
@@ -78,6 +80,8 @@ temperature readings or claims of stock-equivalent performance are applied.
 
 This is an experimental port, with no clean-phone bootstrap in the APK.
 PIN/password, fingerprint and face unlock are unsupported in this guest.
+Tracked: [password/PIN](https://github.com/Murk1ins-ka/gsionlocked/issues/6) and
+[incoming SMS may not arrive](https://github.com/Murk1ins-ka/gsionlocked/issues/7).
 SELinux Enforcing compatibility, operator SMS, all-lens capture, prolonged
 thermal/battery behavior and every application upload flow are not established.
 See the [separate ColorOS compatibility table](COMPATIBILITY.md#coloros-17--find-x9-ultra-in).

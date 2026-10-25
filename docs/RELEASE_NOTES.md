@@ -18,7 +18,9 @@ Exact GSI: `OneOS_ColorOS17_FindX9Ultra_IN.img`, Android 17 / SDK 37, raw ext4,
 a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0
 ```
 
-The image and private prepared runtime are not included. This APK requires the
+Image archives were subsequently added as separate release assets; see
+[GSI downloads](GSI_DOWNLOADS.md). The APK/source archive does not include the
+images or private prepared runtime. This APK requires the
 matching prepared SM-S911B environment. Importing a GSI does not build a port.
 ColorOS PIN/fingerprint/face unlock remain unsupported and incoming operator SMS
 is unresolved. EvoX compatibility results are separate. See [ColorOS](COLOROS.md).

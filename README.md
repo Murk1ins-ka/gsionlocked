@@ -14,6 +14,10 @@
 
 ### Added: ColorOS 17 / Find X9 Ultra IN
 
+**ColorOS bugs:** [password/PIN does not work](https://github.com/Murk1ins-ka/gsionlocked/issues/6);
+[incoming SMS / Google codes may not arrive](https://github.com/Murk1ins-ka/gsionlocked/issues/7).
+The cause of the latest missing SMS has not been established.
+
 Version **0.2.0-coloros-preview** keeps the existing interface and adds a separate
 ColorOS card to **Select GSI**, alongside EvoX and raw-image import. The ColorOS
 launcher verifies its own prepared S23 runtime and image digest, shows launch
@@ -32,7 +36,8 @@ refresh up to 120 Hz. Firefox download, DocumentsUI file selection/local upload,
 MediaStore storage roundtrips and Open Camera JPEG saving were tested on the
 development S23. PIN, fingerprint and face unlock are **unsupported in ColorOS**;
 the EvoX results below do not apply to it. See [ColorOS setup and limitations](docs/COLOROS.md)
-and [profile metadata](profiles/dm1q-coloros17.json). The image is not redistributed.
+and [profile metadata](profiles/dm1q-coloros17.json). ColorOS and Evolution X image
+archives are separate [release downloads](docs/GSI_DOWNLOADS.md), outside the source tree and APK.
 Installing/importing the APK/image alone does not prepare a new phone.
 
 Run a prepared Generic System Image, such as Evolution X / Android 16, over stock OneUI using the running Samsung kernel. The tested path starts a separate Android userspace without flashing physical system partitions or performing a cold kernel reboot.
@@ -73,7 +78,7 @@ The app can import a raw ext4 `.img`, calculate its SHA-256, select the prepared
 
 The development phone has a prepared runtime. A bootstrap package for a clean phone is not included yet. Read the [setup status](docs/SETUP.md) before downloading an APK.
 
-The repository does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Use your own GSI file. The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
+The source tree does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Image archives are available separately in the release; see [GSI downloads](docs/GSI_DOWNLOADS.md). The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
 
 ## GSI used in development
 
@@ -87,7 +92,7 @@ The repository does not contain a GSI image, Google apps, Samsung vendor binarie
 5e8333e15798592bae059bcb78ba85394418afc8f035a13fc0e97c086b8c1e49
 ```
 
-This is the image used by the tested dm1q profile, not a claim that other EvoX versions are interchangeable. The image and its bundled Google apps are not redistributed in this repository. See [profile metadata](profiles/dm1q-fzg1.json).
+This is the image used by the tested dm1q profile, not a claim that other EvoX versions are interchangeable. Its compressed archive is a separate release asset, not part of the app/source archive. See [profile metadata](profiles/dm1q-fzg1.json) and [downloads](docs/GSI_DOWNLOADS.md).
 
 ## Known issues
 
