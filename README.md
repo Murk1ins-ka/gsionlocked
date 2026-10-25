@@ -8,9 +8,24 @@
 <p align="center"><a href="https://github.com/Murk1ins-ka/gsionlocked/releases">Downloads</a> · <a href="docs/SETUP.md">Setup</a> · <a href="https://github.com/Murk1ins-ka/gsionlocked/issues">Known issues</a> · <a href="https://t.me/gsionlocked">Telegram</a> · <a href="README.ru.md">Русский</a></p>
 
 > [!IMPORTANT]
-> Source preview. A matching, prepared runtime is required; installing the APK alone on a new phone is not sufficient.
+> Experimental preview. Install the matching runtime through **Install runtime** after importing your image. Initial packages require the compatible S23/FZG1 host framework; other phones need their own port.
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
+
+### Download and install / Скачать и установить
+
+**English instructions below. [Инструкция на русском](README.ru.md#как-правильно-скачать-и-установить).**
+
+1. Open [v0.3.0 runtime preview](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.3.0-runtime-preview), expand **Assets**, and download **`gsionlocked.apk`**. The GitHub **Source code** ZIP/TAR and `gsionlocked-source.zip` are for developers, not Android installers.
+2. Open [GSI image downloads in v0.2.0](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.2.0-coloros-preview). Download **one system**:
+   - **Evolution X:** `EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img.xz`.
+   - **ColorOS:** **all four** `OneOS_ColorOS17_FindX9Ultra_IN.img.zip.001` through `.004`, saved together in one folder.
+3. Extract the image on your computer. For verified extraction, also download `restore-gsi.py` and `GSI-MANIFEST.json` from that image release into the same folder. With Python 3 installed, run **one** command there: `python restore-gsi.py evolution` or `python restore-gsi.py coloros`. The helper checks archive and extracted-image hashes. See [image sizes, checksums and extraction details](docs/GSI_DOWNLOADS.md). Keep enough disk space for archives and the extracted image (ColorOS alone is about 12.07 GB).
+4. Copy the resulting **`.img`** to your phone and install the APK in One UI. Restore root access first. Current host requirements: **Android 16 / ARM64**, compatible S23/FZG1 framework; ColorOS also requires KernelSU busybox/resetprop. **Do not select `.xz`, `.zip` or `.001` in the app.**
+5. In the app: **Select GSI → Browse files → select the extracted .img → Install runtime**. Grant root and keep the app open. It downloads the matching runtime automatically: about **255 MB for Evolution X** or **556 MB for ColorOS**. You do not need to extract runtime ZIPs manually. The installer checks available space; it keeps a separate image copy and guest storage needs additional space.
+6. Wait for installation to finish, then press **Start** and read the confirmation. Before ColorOS, remove the One UI PIN/password and biometrics. **ColorOS password/PIN, fingerprint and face unlock are unsupported; incoming SMS/Google codes may not arrive.**
+
+An existing runtime is preserved rather than overwritten. A host-framework mismatch requires a compatible port. This installer passed offline tests; a fresh installation and subsequent boot on a physical phone remain unverified. [Full setup and limits](docs/RUNTIME_INSTALLER.md) · [RU/EN Telegram post](docs/TELEGRAM_POST.md).
 
 ### 0.3.0: ColorOS and Evolution X runtime installer
 
@@ -91,10 +106,11 @@ The app can import a raw ext4 `.img`, calculate its SHA-256, select the prepared
 | --- | --- |
 | **Select GSI** | Choose the prepared image or import a raw ext4 `.img`; verify SHA-256 |
 | **Check root** | Check root access and the device profile |
+| **Install runtime** | Download and install the pinned runtime for the imported supported image |
 | **Storage** | Allocate persistent guest storage; increasing it preserves data |
 | **Start** | Start the prepared runtime and show real commands and logs |
 
-The development phone has a prepared runtime. A bootstrap package for a clean phone is not included yet. Read the [setup status](docs/SETUP.md) before downloading an APK.
+Version 0.3.0 supplies separate curated runtime packages through **Install runtime**. These initial packages require a compatible host; they are not universal device adapters. Read the [setup status](docs/SETUP.md).
 
 The source tree does not contain a GSI image, Google apps, Samsung vendor binaries, phone data, signing keys, or a preconfigured userdata image. Image archives are available separately in the release; see [GSI downloads](docs/GSI_DOWNLOADS.md). The runtime source snapshot is included for porting and review; it is not a portable replacement for Android's DSU installer.
 
