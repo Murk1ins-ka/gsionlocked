@@ -29,7 +29,10 @@ trigger race. Any failed restoration check still reboots. Retaining root is a
 runtime test requirement, not a guarantee: both an unchanged boot ID and a fresh
 root request from the host app must pass after return. An automatic return after
 a failed guest boot passed these checks on the development S23, including a new
-root request from this app. A full healthy-session return is a separate test.
+root request from this app. A later healthy-session return restored One UI on
+the same boot with SELinux Enforcing, but the app's root client then failed with
+SIGSYS/seccomp even though an existing ADB root path still answered. App root
+retention therefore remains unresolved; temporary root/access may need restoring.
 
 Selecting prepared ColorOS shows a dedicated screen-lock warning. Launch checks
 KeyguardManager and root-side trust state again; it does not remove a password
@@ -40,10 +43,15 @@ SurfaceFlinger at the guest display handoff. The guest layer exits when OPPO boo
 animation starts, before desktop boot completion. The earlier OneOS WebView log screen is disabled.
 The AOD policy remains disabled without an AOD-off label in the app interface.
 
-The APK must also be installed in the prepared guest for its return button.
-The development guest is updated separately; installing the host APK does not
-silently install applications into another system. The hardware return chord
-remains available independently of the guest app.
+The prepared runtime copies the launcher's APK into guest storage and updates
+the guest launcher after boot so its return button matches the host version.
+This new automatic update path still needs a live-session check. The hardware
+return chord remains available independently of the guest app.
+
+Return uses a styled confirmation sheet followed by a logo, an indeterminate
+spinner and a request-sent message. These describe the request, not a percentage
+or a claim that restoration has already completed. The app screen disappears
+when the guest framework stops; a temporary black screen remains possible.
 
 ## Runtime contract
 

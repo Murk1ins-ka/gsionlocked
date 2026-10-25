@@ -3,8 +3,11 @@
 Added a separate ColorOS 17 / Find X9 Ultra IN profile alongside EvoX in Select
 GSI, preserving the existing gsionlocked interface. Includes matching-host/runtime
 checks, complete image SHA-256 verification, dedicated native launch, a styled
-confirmation sheet, a screen-lock warning at selection, and a guest return button.
+confirmation sheet, a screen-lock warning at selection, and a styled guest return
+sheet/progress screen. Prepared runtime updates the guest launcher after boot.
 The optional root-preserving return remains experimental with reboot fallback.
+A healthy-session return restored One UI without reboot, but app root failed
+afterwards (SIGSYS/seccomp); restoring temporary root may still be necessary.
 Native startup logs close at the OPPO animation. AOD is disabled by the prepared
 runtime and its status label is omitted from the interface; adaptive 120 Hz stays.
 

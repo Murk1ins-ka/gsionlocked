@@ -15,7 +15,7 @@
   },
   "runtime": {
     "stage": "/data/local/tmp/oneos",
-    "manifest_sha256": "ee27c99f9f6d47885f7aff52c6341bea655751586ab51339f581140b951f1f0f",
+    "manifest_sha256": "9bfcb5a5d87d01d0afc81c200ee71a8a4bca7dd412253716a759531e80369284",
     "bootstrap": "requires-prepared-runtime",
     "return_mode": "reboot"
   },

@@ -33,6 +33,7 @@ public final class RootCommands {
             if(stopped){p.destroyForcibly();return "";}
             drain.get(3,TimeUnit.SECONDS);
             String value=result.toString();
+            if(p.exitValue()==159)throw new IOException("Root client blocked (SIGSYS). Restore temporary root/access in KernelSU before retrying.");
             if(p.exitValue()!=0&&!(allowTimeout&&p.exitValue()==124))throw new IOException(value.trim().isEmpty()?"Command failed (exit "+p.exitValue()+").":value.trim());
             return value;
         }finally{if(p.isAlive())p.destroyForcibly();reader.shutdownNow();}

@@ -22,5 +22,13 @@ final class LaunchConfirm {
             Ui.space(body,8);Ui.text(body,"Перед загрузкой gsionlocked проверит блокировку повторно и остановит запуск, если она включена.",13,Ui.MUTED);
         },"Понятно, проверить образ",accepted);
     }
+    static void returnWarning(Activity activity,Runnable accepted){
+        SystemSheet.show(activity,"GSIONLOCKED / ВОЗВРАТ","Вернуться в One UI?",body->{
+            LinearLayout destination=Ui.card(body);Ui.text(destination,"One UI",25,Ui.TEXT);Ui.text(destination,"ColorOS   →   Samsung",16,Ui.ACCENT);
+            Ui.space(destination,12);Ui.text(destination,"Приложения и файлы ColorOS останутся в её хранилище.",14,Ui.MUTED);
+            Ui.space(body,10);Ui.text(body,"Сохрани открытые файлы перед выходом. Экран может временно погаснуть, пока восстанавливаются службы Samsung.",14,Ui.MUTED);
+            Ui.space(body,16);LinearLayout recovery=Ui.card(body);Ui.text(recovery,"Восстановление системы",17,Ui.TEXT);Ui.text(recovery,"Пробный режим пытается вернуть One UI без перезагрузки. Доступ root зависит от KernelSU. При сбое проверки восстановления телефон перезагрузится.",14,Ui.MUTED);
+        },"Вернуться в One UI",accepted);
+    }
     private LaunchConfirm(){}
 }

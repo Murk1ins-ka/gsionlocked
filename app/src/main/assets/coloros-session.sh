@@ -22,7 +22,7 @@ if [ -d "$S/return.lock" ]; then
 fi
 [ -n "$(pidof system_server)" ] || fail 'One UI ещё не загрузилась'
 [ "$(sha256sum /system/framework/services.jar | cut -d' ' -f1)" = 86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3 ] || fail 'эта прошивка One UI не проверена'
-[ "$(sha256sum "$S/fix.sha256" | cut -d' ' -f1)" = ee27c99f9f6d47885f7aff52c6341bea655751586ab51339f581140b951f1f0f ] || fail 'нужно обновить подготовленный комплект ColorOS'
+[ "$(sha256sum "$S/fix.sha256" | cut -d' ' -f1)" = 9bfcb5a5d87d01d0afc81c200ee71a8a4bca7dd412253716a759531e80369284 ] || fail 'нужно обновить подготовленный комплект ColorOS'
 echo 'Проверяю файлы ColorOS…'
 (cd "$S"; sha256sum -c fix.sha256) > "$S/launcher-file-check.log" || fail 'файлы ColorOS изменились'
 for file in "$S"/*.sh; do /system/bin/sh -n "$file" || fail 'ошибка сценария'; done

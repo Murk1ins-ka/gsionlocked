@@ -67,7 +67,7 @@ public final class MainActivity extends Activity {
                 return "Session launched. Output: /data/local/tmp/tempgsi-control/latest.log";
             });
         }));
-        if(ColorOsProfile.guest())buttons.add(Ui.button(page,"Return to One UI",true,()->new AlertDialog.Builder(this).setTitle("Return to One UI?").setMessage("Save open files. The guardian will restore One UI; it may reboot if required.").setNegativeButton("Cancel",null).setPositiveButton("Return",(d,w)->{try{ColorOsProfile.requestReturn(this);status.setText("Return requested. If needed, hold both volume keys for 3 seconds.");}catch(IOException e){status.setText(e.getMessage());}}).show()));
+        if(ColorOsProfile.guest())buttons.add(Ui.button(page,"Вернуться в One UI",true,()->LaunchConfirm.returnWarning(this,this::returnToHost)));
         buttons.add(Ui.button(page,"Storage",false,this::chooseMemory));Ui.space(page,18);
         TextView channel=Ui.text(page,"t.me/gsionlocked",14,Ui.TEXT);channel.setGravity(Gravity.CENTER);channel.setPaintFlags(channel.getPaintFlags()|android.graphics.Paint.UNDERLINE_TEXT_FLAG);channel.setPadding(0,Ui.dp(this,12),0,Ui.dp(this,12));channel.setMinHeight(Ui.dp(this,48));channel.setContentDescription("Open gsionlocked Telegram channel");channel.setOnClickListener(v->{try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://t.me/gsionlocked")));}catch(android.content.ActivityNotFoundException e){status.setText("Install Telegram or a browser to open this link.");}});
         launchPanel=Ui.card(page);Ui.text(launchPanel,"Launch output",14,Ui.TEXT);
@@ -80,6 +80,18 @@ public final class MainActivity extends Activity {
         selectedName=name;selectedSha=sha;getPreferences(0).edit().putString("gsi_name",name).putString("gsi_sha256",sha).apply();
         imageLabel.setText(name);
         memory.setText(memoryLabel());
+    }
+    private void returnToHost(){
+        if(!ColorOsProfile.guest()||busy)return;busy=true;
+        LinearLayout page=Ui.screen(this);page.setGravity(Gravity.CENTER);
+        ImageView logo=new ImageView(this);logo.setImageResource(getResources().getIdentifier("brand_logo","drawable",getPackageName()));logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setBackground(Ui.shape(this,android.graphics.Color.BLACK,30));logo.setClipToOutline(true);
+        page.addView(logo,new LinearLayout.LayoutParams(Ui.dp(this,100),Ui.dp(this,100)));Ui.space(page,24);
+        TextView title=Ui.heading(page,"Возврат в One UI");title.setTextSize(28);title.setGravity(Gravity.CENTER);Ui.space(page,14);
+        TextView progress=Ui.text(page,"Подготавливаем запрос…",16,Ui.MUTED);progress.setGravity(Gravity.CENTER);
+        Ui.space(page,24);ProgressBar spinner=new ProgressBar(this);spinner.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(Ui.ACCENT));page.addView(spinner,new LinearLayout.LayoutParams(Ui.dp(this,42),Ui.dp(this,42)));
+        Ui.space(page,24);Ui.text(page,"Дождись экрана Samsung. Восстановление может занять несколько минут.",14,Ui.MUTED).setGravity(Gravity.CENTER);Ui.reveal(page);
+        ui.postDelayed(()->{try{ColorOsProfile.requestReturn(this);progress.setText("Запрос отправлен…");}catch(IOException failure){spinner.setVisibility(android.view.View.GONE);progress.setText("Запрос не отправлен. Удерживай обе кнопки громкости 3 секунды.");}},900);
     }
     private void confirmColorOs(){
         if(busy)return;

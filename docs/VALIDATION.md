@@ -29,9 +29,18 @@
   MediaStore image/download write-publish-read roundtrips, including cleanup.
 - The signed launcher APK installed inside that guest. Its return action is a
   private-file request and does not grant guest apps root. Healthy-session return
-  is a separate validation from the earlier automatic return. Prior browser
+  subsequently restored host core PID 23087, boot complete, SELinux Enforcing
+  and all 782 checked APEX files readable, with the same kernel boot ID. The
+  host app root client then failed with SIGSYS (seccomp blocked syscall 142),
+  despite an existing ADB root path still answering. App root retention is
+  unresolved; it must not be advertised as working universally. Prior browser
   upload/camera evidence is listed in the compatibility table; these checks do
   not establish that every application or hardware feature works.
+- The return confirmation and progress layout were visually inspected in a
+  separate, unprivileged UI preview package on One UI. The preview wrote only
+  its own private test file and was then uninstalled. It did not switch systems.
+  The new return styling and automatic guest APK update have not yet completed
+  a live ColorOS roundtrip. Compilation and signature verification passed.
 
 ## App/source preview
 
