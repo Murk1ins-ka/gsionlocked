@@ -3,6 +3,9 @@ import os, subprocess, shutil, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 subprocess.run([__import__('sys').executable,str(ROOT/'tools/check_oneos_port.py')],check=True)
+subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_host_abi.py')],check=True)
+subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_dynamic_dispatch.py')],check=True)
+subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_host_binding.py')],check=True)
 subprocess.run([__import__('sys').executable,str(ROOT/'tools/check_coloros.py')],check=True)
 exe='.exe' if os.name=='nt' else ''
 java=Path(os.environ['JAVA_HOME'])/'bin' if os.getenv('JAVA_HOME') else None

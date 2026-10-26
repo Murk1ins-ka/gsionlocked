@@ -11,12 +11,16 @@ final class ColorOsProfile {
     static final String SHA256="a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0";
     static boolean matches(String digest){return SHA256.equals(digest);}
     static boolean guest(){return Build.VERSION.SDK_INT==37&&new File("/data/oneos_genv.sh").isFile();}
+    static void requireUnlockedHost(Context context)throws IOException{
+        DeviceProfile.requireSamsungHost();
+        KeyguardManager lock=(KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
+        if(lock.isDeviceSecure()||lock.isDeviceLocked())throw new IOException("Unlock One UI and disable PIN/password/biometrics before this experimental session.");
+    }
     static String command(Context context,String action)throws IOException {
         if(!action.equals("status")&&!action.equals("start")&&!action.equals("start-preserve")&&!action.equals("select"))throw new IOException("Unknown ColorOS action.");
         DeviceProfile.requireHost();
         if(action.startsWith("start")){
-            KeyguardManager lock=(KeyguardManager)context.getSystemService(Context.KEYGUARD_SERVICE);
-            if(lock.isDeviceSecure()||lock.isDeviceLocked())throw new IOException("Unlock One UI and disable PIN/password/biometrics before this experimental session.");
+            requireUnlockedHost(context);
         }
         File script=new File(context.getFilesDir(),"coloros-session.sh");
         try(InputStream in=context.getAssets().open("coloros-session.sh");FileOutputStream out=new FileOutputStream(script)){

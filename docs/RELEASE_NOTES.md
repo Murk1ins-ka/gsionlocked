@@ -1,3 +1,11 @@
+# Unreleased — local host runtime development
+
+System-only local framework/library capture under temporary root; DEX 035–041
+Binder table extraction; a generated installd mapping; guarded dynamic guest
+dispatch and its offline builder/tests. Published runtime packages and launch
+restrictions remain unchanged pending backend integration and hardware validation.
+See [local runtime development](LOCAL_HOST_RUNTIME.md).
+
 # 0.3.1-samsung-preview
 
 Removed the separate Install runtime button. Start automatically prepares a

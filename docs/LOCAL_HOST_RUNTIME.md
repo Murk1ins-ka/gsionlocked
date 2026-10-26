@@ -1,0 +1,90 @@
+# Local host runtime work — 2026-10-26
+
+This work is part of replacing a single-phone prepared environment with preparation
+from each Samsung's own system under temporary root. **It is not yet a universal
+launch backend, nor evidence that another Samsung has booted.**
+
+## Implemented in current source
+
+- `HostPrepareMain` captures only fixed `/system/framework` JARs and selected
+  `/system/lib64` libraries, resolving files only within immutable `/system` or
+  `/apex` roots. No account, app, EFS, keystore or modem data is collected.
+- The root-owned local capsule lives below
+  `/data/local/tmp/gsionlocked-host-runtimes/<content-hash>` and contains copied
+  system inputs, their provenance hashes and a generated installd mapping.
+  Boot-class-path `framework.jar` definitions take precedence; `services.jar`
+  is used only when the interface is absent from readable framework DEX.
+  A corrupt/stripped framework is not silently treated as a compatible fallback.
+  Cache identity includes framework and selected library contents; firmware/APEX
+  changes produce another capsule. Existing capsules are verified and preserved.
+- First-start preparation invokes this capture on Samsung ARM64 hosts with
+  Android 12+ before checking the currently available launch backend. This does
+  not relax the backend's Android 16 or S23 runtime checks.
+- `DexBinderTable` extracts transaction constants and method prototypes without
+  executing/loading captured framework code. It supports standard DEX and the
+  logical-container layout in DEX 041. Offsets, hashes, counts, duplicate classes,
+  ambiguous method names and transaction collisions are checked.
+- The guest adapter `GsionlockedInstalldMap` resolves permitted calls from the
+  locally generated mapping with an exact method signature. Destructive calls
+  remain denied even if their codes are present in the host table.
+- The offline builder patches **already guarded** OneOSInstalldProxy calls to
+  dynamic lookup and assembles a candidate services JAR. Existing denied methods
+  remain denied; only a pinned guarded input JAR is accepted.
+- An integration builder connects local capture to that candidate: it prepares
+  launcher/guest-start overrides and a dedicated read-only map bind before pivot,
+  only in the private guest namespace. It updates candidate guard hashes but does
+  not install them or relax any current platform gates.
+
+DEX format and Binder compatibility references:
+[AOSP DEX](https://source.android.com/docs/core/runtime/dex-format),
+[AOSP stable AIDL](https://source.android.com/docs/core/architecture/aidl/stable-aidl).
+The host framework's internal Binder interfaces do not acquire a cross-version
+compatibility guarantee just from their Java method names; full runtime/hardware
+validation is still required.
+
+## Offline checks completed
+
+- Extracted 78 installd transactions from the previously saved Samsung host
+  `services.jar`, including its two-logical-file DEX 041 container.
+- Compiled real synthetic Android Binder fixtures with D8: changed host IDs are
+  extracted without model-name assumptions. Corruption, invalid offsets/counts,
+  duplicate definitions/codes and ambiguous signatures are rejected.
+- Capsule tests copy fixture system files and libraries, generate the second
+  host's distinct code table, verify hashes, preserve existing directories and
+  reject unexpected/private metadata. These are not live SELinux/permission tests.
+- Dispatch tests preserve signature matching and the destructive-operation guard.
+- The actual guarded guest proxy has 25 permitted methods adapted; its existing
+  33 denied-method blocks are retained. Candidate assembly is tested separately.
+- The binding script passes shell syntax and rejects the host namespace before
+  mutation in a test with fake identity/mount commands. A real namespace/bind and
+  actual Android file labels are not validated by that test.
+
+Run: `python tools/test_host_abi.py` (JDK and Android SDK build-tools 35.0.0).
+
+Candidate builder (external APKTool 3.0.3, no phone access):
+
+```sh
+python tools/build_samsung_dispatch.py \
+  --base-services /path/to/pinned/services_patched.jar \
+  --apktool /path/to/apktool.jar --sdk /path/to/android-sdk \
+  --java-home /path/to/jdk --output /path/to/new-build-directory
+```
+
+## Still required for the requested end state
+
+1. Validate the candidate read-only binding on-device and ship a signed common
+   runtime with updated guard hashes. The candidate source integration is built;
+   the current published runtime does not contain it.
+2. Replace the internal S23 checks and device-specific paths with captured
+   platform contracts, without simply deleting compatibility validation.
+3. Prepare guest APEX/runtime inputs from the selected GSI locally, so host
+   components come from the phone and do not require a full S23 runtime download.
+4. Adapt display/composer, input, vendor namespaces, service ownership and return
+   across Samsung platforms/host SDKs. Java transaction signatures alone do not
+   prove Parcelable layout or HAL/native compatibility.
+5. Validate actual start/desktop/input/storage and recovery on the relevant
+   Samsung combinations. No other-device hardware validation is claimed.
+
+Current release downloads remain unchanged until a replacement backend is ready.
+The project goal remains active; implementing local extraction is an intermediate
+step toward it, not completion.

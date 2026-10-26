@@ -51,7 +51,7 @@ public final class MainActivity extends Activity {
             if(ColorOsProfile.matches(selectedSha)){confirmColorOs();return;}
             if(busy)return;if(selectedSha==null){status.setText("Select a GSI first.");return;}launchActive=true;sessionExit=null;sessionError=null;synchronized(logText){logText.setLength(0);}launchPanel.setVisibility(android.view.View.VISIBLE);launchPanel.post(()->launchPanel.requestRectangleOnScreen(new android.graphics.Rect(0,0,launchPanel.getWidth(),launchPanel.getHeight()),false));
             final int requested=mib;final String imageSha=selectedSha;task("Starting…",()->{
-                DeviceProfile.requireHost();
+                DeviceProfile.requireSamsungHost();
                 if(!DeviceProfile.SHA256.equals(selectedSha))throw new IOException("No prepared runtime profile supports this image. This EvoX profile requires the image listed in profiles/dm1q-fzg1.json.");
                 AutomaticSetup.ensure(this,imageSha,this::appendLog,this::isDestroyed);
                 if(isDestroyed())throw new IOException("Launch cancelled: reopen the app and press Start.");
@@ -105,7 +105,7 @@ public final class MainActivity extends Activity {
                 task("Checking ColorOS runtime…",()->{
                     appendLog("Selected GSI: "+ColorOsProfile.NAME);appendLog("SHA-256: "+ColorOsProfile.SHA256);
                     // Check the host lock before a potentially long download, and again at launch.
-                    ColorOsProfile.command(this,preserveRoot?"start-preserve":"start");
+                    ColorOsProfile.requireUnlockedHost(this);
                     AutomaticSetup.ensure(this,ColorOsProfile.SHA256,this::appendLog,this::isDestroyed);
                     if(isDestroyed())throw new IOException("Launch cancelled: reopen the app and press Start.");
                     String result=RootCommands.stream(this,ColorOsProfile.command(this,preserveRoot?"start-preserve":"start"),this::appendLog,180,()->false,false);

@@ -19,6 +19,7 @@ public final class DeviceProfileTest {
         Build.SUPPORTED_64_BIT_ABIS=new String[]{"arm64-v8a"};DeviceProfile.requireHost();
         Build.MANUFACTURER="Xiaomi";rejects();Build.MANUFACTURER="samsung";
         Build.BRAND="google";rejects();Build.BRAND="samsung";DeviceProfile.requireHost();
+        Build.VERSION.SDK_INT=37;DeviceProfile.requireSamsungHost();rejects();Build.VERSION.SDK_INT=36;
         System.out.println("PASS: Samsung only, arbitrary Samsung model/firmware; SDK and ARM64 requirements retained");
     }
 }

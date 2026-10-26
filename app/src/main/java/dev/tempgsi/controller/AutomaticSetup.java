@@ -7,9 +7,11 @@ import java.util.function.*;
 /** First-start preparation. Never treats a partial installation as an empty phone. */
 final class AutomaticSetup {
     static void ensure(Context context,String imageSha,Consumer<String> progress,BooleanSupplier cancelled)throws Exception {
-        DeviceProfile.requireHost();
+        DeviceProfile.requireSamsungHost();
         boolean coloros=ColorOsProfile.matches(imageSha);
         if(!coloros&&!DeviceProfile.SHA256.equals(imageSha))throw new IOException("No compatible backend for this GSI image.");
+        HostPreparation.capture(context,progress,cancelled);
+        DeviceProfile.requireHost();
         String probe=coloros
             ? "if [ -L /data/local/tmp/oneos ]; then echo SETUP_PARTIAL; elif [ -d /data/local/tmp/oneos ] && [ -f /data/local/tmp/oneos/fix.sha256 ] && [ -f /data/local/tmp/oneos/system.raw ]; then echo SETUP_PRESENT; elif [ -e /data/local/tmp/oneos ]; then echo SETUP_PARTIAL; else echo SETUP_MISSING; fi"
             : "if [ -L /data/local/tmp/gsionlocked-profile.properties ]; then echo SETUP_PARTIAL; elif [ -f /data/local/tmp/gsionlocked-profile.properties ] && [ -d /data/local/tmp/tempgsi-evox154 ] && [ -d /data/local/tmp/tempgsi-gsionlocked198 ]; then echo SETUP_PRESENT; elif [ -e /data/local/tmp/gsionlocked-profile.properties ] || [ -e /data/local/tmp/tempgsi-evox154 ] || [ -e /data/local/tmp/tempgsi-gsionlocked198 ]; then echo SETUP_PARTIAL; else echo SETUP_MISSING; fi";

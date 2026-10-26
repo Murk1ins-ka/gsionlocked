@@ -44,6 +44,11 @@ final class RuntimeInstaller {
         calls++;if(fail)throw new IOException("Injected install failure");return "fixture installed";
     }
 }
+final class HostPreparation {
+    static void capture(Context context,Consumer<String> progress,BooleanSupplier cancelled)throws IOException{
+        if(cancelled.getAsBoolean())throw new IOException("Cancelled host capture fixture");
+    }
+}
 final class ColorOsProfile {
     static final String SHA256="a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0";
     static boolean matches(String sha){return SHA256.equals(sha);}

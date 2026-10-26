@@ -12,6 +12,14 @@
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
 
+### In development: local Samsung runtime preparation
+
+Current development source can capture this phone's own system framework/libraries
+and derive its Binder transaction table with temporary root. A candidate guest
+adapter is built for per-host installd dispatch. This work is intended to replace
+the fixed S23 preparation; it **does not yet enable other Samsung launches**.
+Published 0.3.1 downloads are unchanged. [Implementation, tests and remaining work](docs/LOCAL_HOST_RUNTIME.md).
+
 ### 0.3.1: Samsung compatibility and OneOS porting sources
 
 Removed the separate **Install runtime** action. **Start** now checks for an
