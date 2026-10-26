@@ -12,8 +12,8 @@ prepared per-device runtime.
 
 ## Prepared phone
 
-For first setup in 0.3.0, import the extracted `.img` with **Select GSI → Browse
-files**, then choose **Install runtime**. See [runtime installation](RUNTIME_INSTALLER.md)
+For first setup in 0.3.1, import the extracted `.img` with **Select GSI → Browse
+files**, then choose **Start**. Missing-environment setup is automatic. See [runtime installation](RUNTIME_INSTALLER.md)
 for the matching host requirements and offline-only installer validation.
 
 1. Install the APK in One UI. Temporary KernelSU root must already work.

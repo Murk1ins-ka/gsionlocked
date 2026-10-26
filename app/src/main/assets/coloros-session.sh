@@ -10,7 +10,7 @@ fail() { echo "Проверка не пройдена: $*"; exit 2; }
 [ "$(getprop ro.product.cpu.abi)" = arm64-v8a ] || fail 'нужна архитектура arm64-v8a'
 [ "$(getenforce)" = Enforcing ] || fail 'состояние One UI не подтверждено'
 [ -x "$BB" ] || fail 'не найден KernelSU busybox'
-[ -d "$S" ] && [ ! -L "$S" ] || fail 'Runtime отсутствует: импортируй .img через Browse files и нажми «Установить runtime»'
+[ -d "$S" ] && [ ! -L "$S" ] || fail 'Среда отсутствует: импортируй .img через Browse files и нажми Start для автоматической подготовки'
 [ "$(getprop sys.boot_completed)" = 1 ] || fail 'One UI ещё запускается'
 [ -z "$(awk '$5 ~ /^\/data\/local\/tmp\/oneos(\/|$)/ {print}' /proc/1/mountinfo)" ] || fail 'среда уже используется'
 if [ -d "$S/return.lock" ]; then

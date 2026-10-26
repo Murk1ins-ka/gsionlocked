@@ -24,7 +24,7 @@ final class GsiPicker {
         Ui.space(body,12);TextView title=Ui.text(body,"Select GSI",25,Ui.TEXT);title.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));
         TextView current=Ui.text(body,selected==null?"No image selected":"Selected: "+selected,13,Ui.MUTED);current.setMaxLines(2);current.setEllipsize(android.text.TextUtils.TruncateAt.END);Ui.space(body,22);
 
-        Ui.text(body,"Первый запуск: Browse files → импорт .img → Установить runtime → Start.",13,Ui.MUTED);Ui.space(body,12);
+        Ui.text(body,"Первый запуск: Browse files → выбери .img → Start. Среда подготовится автоматически. Оставь приложение открытым; понадобится интернет и свободное место.",13,Ui.MUTED);Ui.space(body,12);
         LinearLayout existing=Ui.card(body);row(existing,activity,"Prepared EvoX","Android 16 · установленный runtime",true);
         Ui.button(existing,"Use prepared image",true,()->{dialog.dismiss();prepared.run();});
         Ui.space(body,6);

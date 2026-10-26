@@ -1,5 +1,10 @@
 # 0.3.1-samsung-preview
 
+Removed the separate Install runtime button. Start automatically prepares a
+missing compatible environment, then continues normal launch checks. Existing
+and partial environments are preserved; installation failure or closing the app
+stops first-start continuation. Runtime files remain necessary internally.
+
 Samsung-only host checks, local Compatibility report, and 13 OneOS reference
 identity tuples. Added 106 pinned OneOS porting source files, provenance checks
 and an offline overlay hash validator. OneLineage-derived session assets are

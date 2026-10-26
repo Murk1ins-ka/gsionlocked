@@ -1,5 +1,15 @@
 # Runtime installation / Установка runtime
 
+**В 0.3.1 отдельная кнопка Install runtime убрана.** Текущий порядок:
+**Select GSI → Browse files → .img → Start**. Start проверяет наличие среды,
+автоматически подготавливает отсутствующую и продолжает проверку запуска.
+Неполная среда не перезаписывается. При закрытии приложения во время подготовки
+запуск после установки отменяется. Ниже описан сам механизм установки, добавленный
+в 0.3.0; отдельная кнопка относится только к версии 0.3.0.
+
+**0.3.1:** import `.img` and press **Start**; missing-environment preparation is
+automatic, followed by launch checks. The separate button below describes 0.3.0.
+
 В 0.3.0 добавлена кнопка **Install runtime** и отдельные пакеты для Evolution X и
 ColorOS. APK скачивает пакет по закреплённому HTTPS URL и SHA-256; пользователю
 не нужно вручную создавать `gsionlocked-profile.properties`.

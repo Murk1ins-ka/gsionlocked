@@ -1,10 +1,11 @@
 # Setup status
 
-## 0.3.0 installer preview
+## 0.3.1 automatic first-start setup
 
-Use **Select GSI → Browse files → import the matching .img → Install runtime**.
+Use **Select GSI → Browse files → import the matching .img → Start**.
 The app downloads and verifies a separate ColorOS/EvoX package, checks the host
-framework and prepares files without starting a guest. See [runtime installation](RUNTIME_INSTALLER.md).
+framework and prepares missing files automatically, then continues launch checks.
+There is no separate Install runtime action. See [runtime installation](RUNTIME_INSTALLER.md).
 Initial packages target the existing S23/FZG1 port and have offline validation;
 fresh installation/boot on hardware is not yet established. This is not an
 automatic port for arbitrary devices. Existing runtime folders are preserved.
@@ -31,7 +32,7 @@ python tools/check_device.py --adb /path/to/adb
 ```
 
 The audit reports model/firmware as tested or untested, but does not reject by
-their names. It checks Android 16 / ARM64 and whether the runtime profile exists.
+their names. It checks Samsung manufacturer/brand, Android 16 / ARM64 and whether the runtime profile exists.
 It does not install a runtime or modify Android. An accepted host platform alone
 is not a complete installation. Model-name restrictions were removed in 0.2.1;
 device-specific adapters and the ColorOS host-framework digest remain required.

@@ -41,20 +41,10 @@ public final class MainActivity extends Activity {
         Ui.space(page,22);TextView title=Ui.heading(page,"gsionlocked");title.setGravity(Gravity.CENTER);title.setLetterSpacing(-.035f);
         Ui.space(page,28);
         LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?(ColorOsProfile.guest()?"ColorOS 17 is running":"EvoX is running"):selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
-        status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"First setup: import .img → Install runtime → Start",14,Ui.MUTED);Ui.space(page,8);
+        status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"Select .img → Start · first-start setup is automatic",14,Ui.MUTED);Ui.space(page,8);
         if(!inside)Ui.text(card,"Только Samsung / Samsung only. Другие модели требуют совместимый runtime; текущие пакеты — S23/FZG1, Android 16 / arm64.",12,Ui.MUTED);
         if(!inside)buttons.add(Ui.button(page,"Compatibility / Совместимость",false,()->CompatibilityReport.show(this)));
         buttons.add(Ui.button(page,"Select GSI",false,this::chooseGsi));
-        if(!inside)buttons.add(Ui.button(page,"Install runtime",false,()->{
-            if(busy)return;
-            SystemSheet.show(this,"GSIONLOCKED / ПОДГОТОВКА","Установить runtime?",body->{
-                Ui.text(body,"Сначала импортируй распакованный .img через Select GSI → Browse. Установщик скачает пакет именно для выбранной системы, проверит SHA-256 и подготовит отдельную среду.",14,Ui.TEXT);
-                Ui.space(body,12);Ui.text(body,"One UI продолжит работать. Прошивка не запускается автоматически. Нужны root, свободное место и совместимый framework хоста; пакет не является универсальным портом для всех телефонов.",14,Ui.MUTED);
-            },"Установить runtime",()->{
-                launchPanel.setVisibility(android.view.View.VISIBLE);synchronized(logText){logText.setLength(0);}
-                task("Preparing runtime…",()->RuntimeInstaller.install(this,selectedSha,this::appendLog,this::isDestroyed));
-            });
-        }));
         buttons.add(Ui.button(page,"Check root",false,()->{if(inside){status.setText("Check root from One UI before launch.");return;}task("Checking root…",()->{String r=RootCommands.run(this,"id");if(!r.contains("uid=0(root)"))throw new IOException("Allow root access in KernelSU.");if(ColorOsProfile.matches(selectedSha))return RootCommands.stream(this,ColorOsProfile.command(this,"status"),this::appendLog,180,()->isDestroyed(),false);return "Root access confirmed.";});}));
         buttons.add(Ui.button(page,"Start",true,()->{
             if(inside){status.setText("A GSI is already running.");return;}
@@ -63,11 +53,13 @@ public final class MainActivity extends Activity {
             final int requested=mib;final String imageSha=selectedSha;task("Starting…",()->{
                 DeviceProfile.requireHost();
                 if(!DeviceProfile.SHA256.equals(selectedSha))throw new IOException("No prepared runtime profile supports this image. This EvoX profile requires the image listed in profiles/dm1q-fzg1.json.");
+                AutomaticSetup.ensure(this,imageSha,this::appendLog,this::isDestroyed);
+                if(isDestroyed())throw new IOException("Launch cancelled: reopen the app and press Start.");
                 appendLog("Selected GSI: "+selectedName);
                 appendLog("SHA-256: "+selectedSha);
                 appendLog("Extracting session-launch from APK");
                 File helper=new File(getFilesDir(),"session-launch");try(InputStream in=getAssets().open("session-launch");FileOutputStream out=new FileOutputStream(helper)){byte[] data=new byte[65536];int n;while((n=in.read(data))!=-1)out.write(data,0,n);}
-                String command="set -ex; test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Runtime is not installed. Import .img and tap Install runtime.'; exit 12; }; mkdir -p /data/local/tmp/tempgsi-control; cp "+quote(helper.getAbsolutePath())+" /data/local/tmp/tempgsi-control/session-launch; chmod 755 /data/local/tmp/tempgsi-control/session-launch; /data/local/tmp/tempgsi-control/session-launch "+quote(getApplicationInfo().sourceDir)+" "+requested+" --unlimited "+quote(imageSha);
+                String command="set -ex; test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Environment preparation did not finish. Reopen the app and press Start.'; exit 12; }; mkdir -p /data/local/tmp/tempgsi-control; cp "+quote(helper.getAbsolutePath())+" /data/local/tmp/tempgsi-control/session-launch; chmod 755 /data/local/tmp/tempgsi-control/session-launch; /data/local/tmp/tempgsi-control/session-launch "+quote(getApplicationInfo().sourceDir)+" "+requested+" --unlimited "+quote(imageSha);
                 appendLog("Requesting root access");
                 String r=RootCommands.stream(this,command,this::appendLog,45,()->false,false);
                 if(!r.contains("Phone-owned controller PID"))throw new IOException("Launcher did not confirm startup.");
@@ -112,6 +104,10 @@ public final class MainActivity extends Activity {
                 synchronized(logText){logText.setLength(0);}launchPanel.setVisibility(android.view.View.VISIBLE);
                 task("Checking ColorOS runtime…",()->{
                     appendLog("Selected GSI: "+ColorOsProfile.NAME);appendLog("SHA-256: "+ColorOsProfile.SHA256);
+                    // Check the host lock before a potentially long download, and again at launch.
+                    ColorOsProfile.command(this,preserveRoot?"start-preserve":"start");
+                    AutomaticSetup.ensure(this,ColorOsProfile.SHA256,this::appendLog,this::isDestroyed);
+                    if(isDestroyed())throw new IOException("Launch cancelled: reopen the app and press Start.");
                     String result=RootCommands.stream(this,ColorOsProfile.command(this,preserveRoot?"start-preserve":"start"),this::appendLog,180,()->false,false);
                     if(!result.contains("COLOROS_START_DISPATCHED="))throw new IOException("ColorOS launcher did not confirm dispatch.");
                     String follow="timeout 90 /system/bin/tail -n +1 -f /data/local/tmp/oneos/takeover-s23-launcher.log";
@@ -123,7 +119,7 @@ public final class MainActivity extends Activity {
     private void chooseGsi(){
         if(busy)return;if(inside){status.setText("Select a GSI in OneUI before starting a session.");return;}
         GsiPicker.show(this,selectedSha==null?null:selectedName,()->task("Checking prepared image…",()->{
-                DeviceProfile.requireHost();String result=RootCommands.run(this,"test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Runtime missing: import .img through Browse files, then tap Install runtime.'; exit 12; }; sha256sum "+DeviceProfile.SOURCE);
+                DeviceProfile.requireHost();String result=RootCommands.run(this,"test -f /data/local/tmp/gsionlocked-profile.properties || { echo 'Import .img through Browse files, then press Start for automatic setup.'; exit 12; }; sha256sum "+DeviceProfile.SOURCE);
                 if(!result.trim().startsWith(DeviceProfile.SHA256+" "))throw new IOException("Prepared EvoX image is missing or differs.");
                 runOnUiThread(()->select("Prepared EvoX 11.11",DeviceProfile.SHA256));return "Prepared EvoX selected.";
             }),()->LaunchConfirm.passwordWarning(this,()->task("Verifying prepared ColorOS image…",()->{
@@ -139,7 +135,7 @@ public final class MainActivity extends Activity {
         task("Importing GSI…",()->{
             GsiStore.Image image=GsiStore.read(this,uri,this::appendLog,this::isDestroyed);
             runOnUiThread(()->select(image.name,image.sha256));
-            return ColorOsProfile.matches(image.sha256)?"ColorOS image recognized. A matching prepared ColorOS runtime is required; import alone does not install it.":DeviceProfile.SHA256.equals(image.sha256)?"Image matches the tested EvoX profile.":"Image imported. No tested runtime profile supports this image yet.";
+            return ColorOsProfile.matches(image.sha256)?"ColorOS recognized. Press Start; first-start setup is automatic on a compatible host.":DeviceProfile.SHA256.equals(image.sha256)?"Evolution X recognized. Press Start for automatic setup.":"Image imported. No tested backend supports this image yet.";
         });
     }
     private void appendLog(String line){
