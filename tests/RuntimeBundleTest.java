@@ -15,6 +15,14 @@ public final class RuntimeBundleTest {
         if(bad.equals("link-parent"))p.setProperty("link.oneos","/system/lib64");
         for(Map.Entry<String,byte[]> x:data.entrySet())p.setProperty("sha."+x.getKey(),RuntimeBundle.hash(new ByteArrayInputStream(x.getValue())));
         if(bad.equals("missing"))p.setProperty("sha.oneos/missing",IMAGE);
+        if(bad.startsWith("derived")){
+            p.setProperty("format",bad.equals("derived-old")?"1":"2");
+            String target="oneos/test_payload.img";
+            p.setProperty("sha."+target,IMAGE);
+            p.setProperty("image."+target,bad.equals("derived-source")?"/data/private.apex":"/system/apex/test.apex");
+            p.setProperty("bytes."+target,bad.equals("derived-size")?"-1":"4096");
+            if(bad.equals("derived-collision"))data.put(target,new byte[]{1});
+        }
         File zip=dir.resolve("test-"+bad+".zip").toFile();try(ZipOutputStream out=new ZipOutputStream(new FileOutputStream(zip))){out.putNextEntry(new ZipEntry("runtime.properties"));p.store(out,"test");out.closeEntry();for(Map.Entry<String,byte[]> x:data.entrySet()){out.putNextEntry(new ZipEntry("payload/"+x.getKey()));out.write(x.getValue());out.closeEntry();}}
         return zip;
     }
@@ -23,7 +31,9 @@ public final class RuntimeBundleTest {
         Path temp=Files.createTempDirectory("runtime-bundle-test-");
         try{
             File good=fixture(temp,"good");new RuntimeBundle(good,RuntimeBundle.hash(good),IMAGE);
-            for(String bad:new String[]{"escape","userdata","host","link-parent","missing"}){File zip=fixture(temp,bad);boolean rejected=false;try{new RuntimeBundle(zip,RuntimeBundle.hash(zip),IMAGE);}catch(IOException expected){rejected=true;}if(!rejected)throw new AssertionError("Accepted "+bad);}
+            File derived=fixture(temp,"derived-good");RuntimeBundle local=new RuntimeBundle(derived,RuntimeBundle.hash(derived),IMAGE);
+            if(local.imageComponents.size()!=1||local.payloadBytes!=4106)throw new AssertionError("Derived components not accounted for");
+            for(String bad:new String[]{"escape","userdata","host","link-parent","missing","derived-old","derived-source","derived-size","derived-collision"}){File zip=fixture(temp,bad);boolean rejected=false;try{new RuntimeBundle(zip,RuntimeBundle.hash(zip),IMAGE);}catch(IOException expected){rejected=true;}if(!rejected)throw new AssertionError("Accepted "+bad);}
             try{new RuntimeBundle(good,IMAGE,IMAGE);throw new AssertionError("Accepted wrong package digest");}catch(IOException expected){}
             System.out.println("PASS: runtime packages reject traversal, private data, host-path abuse, link parents, missing files and wrong hashes");
         }finally{try(java.util.stream.Stream<Path> files=Files.walk(temp)){for(Path p:files.sorted(Comparator.reverseOrder()).toArray(Path[]::new))Files.delete(p);}}

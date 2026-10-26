@@ -2,6 +2,7 @@ from pathlib import Path
 import os, subprocess, shutil, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
+subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_image_components.py')],check=True)
 subprocess.run([__import__('sys').executable,str(ROOT/'tools/check_oneos_port.py')],check=True)
 subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_host_abi.py')],check=True)
 subprocess.run([__import__('sys').executable,str(ROOT/'tools/test_dynamic_dispatch.py')],check=True)
@@ -14,7 +15,7 @@ runtime=str(java/('java'+exe)) if java else shutil.which('java')
 with tempfile.TemporaryDirectory(prefix='gsionlocked-test-') as output:
     subprocess.run([javac,'-encoding','UTF-8','-d',output,str(ROOT/'app/src/main/java/dev/tempgsi/controller/RuntimeBundle.java'),str(ROOT/'tests/RuntimeBundleTest.java')],check=True)
     subprocess.run([runtime,'-cp',output,'dev.tempgsi.controller.RuntimeBundleTest'],check=True)
-    subprocess.run([javac,'-encoding','UTF-8','-d',output,str(ROOT/'app/src/main/java/dev/tempgsi/controller/RuntimeBundle.java'),str(ROOT/'app/src/main/java/dev/tempgsi/controller/RuntimeProfile.java'),str(ROOT/'app/src/main/java/dev/tempgsi/controller/RuntimeFiles.java'),str(ROOT/'tests/RuntimeFilesTest.java')],check=True)
+    subprocess.run([javac,'-encoding','UTF-8','-d',output,*[str(ROOT/('app/src/main/java/dev/tempgsi/controller/'+name+'.java')) for name in ('RuntimeBundle','RuntimeProfile','RuntimeFiles','ReadOnlyExt4','GsiFormat','GuestImageComponents')],str(ROOT/'tests/RuntimeFilesTest.java')],check=True)
     subprocess.run([runtime,'-cp',output,'dev.tempgsi.controller.RuntimeFilesTest'],check=True)
     subprocess.run([javac,'-encoding','UTF-8','-d',output,str(ROOT/'tests/stubs/android/os/Build.java'),str(ROOT/'app/src/main/java/dev/tempgsi/controller/SamsungProfiles.java'),str(ROOT/'app/src/main/java/dev/tempgsi/controller/DeviceProfile.java'),str(ROOT/'tests/DeviceProfileTest.java'),str(ROOT/'tests/SamsungProfilesTest.java')],check=True)
     subprocess.run([runtime,'-cp',output,'dev.tempgsi.controller.DeviceProfileTest'],check=True)

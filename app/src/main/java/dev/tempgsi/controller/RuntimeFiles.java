@@ -37,6 +37,7 @@ public final class RuntimeFiles {
         progress.accept("RUNTIME_EXTRACT_FILES");
         try(ZipFile zip=new ZipFile(archive)){
             for(String name:bundle.files.keySet()){
+                if(bundle.imageComponents.containsKey(name))continue;
                 File out=child(staging,name);try(InputStream in=zip.getInputStream(zip.getEntry("payload/"+name))){copy(in,out);}
                 if(!RuntimeBundle.hash(out).equals(bundle.files.get(name)))throw new IOException("Extracted runtime hash differs");
                 int mode=Integer.parseInt(bundle.manifest.getProperty("mode."+name,"644"),8);if(mode!=0644&&mode!=0755&&mode!=0600)throw new IOException("Invalid payload mode");platform.mode(out,mode);
@@ -48,6 +49,19 @@ public final class RuntimeFiles {
         File imageOut=child(staging,relative);if(imageOut.exists()||Files.isSymbolicLink(imageOut.toPath()))throw new IOException("Runtime must not contain a GSI image");
         progress.accept("RUNTIME_COPY_AND_VERIFY_GSI");try(InputStream in=new FileInputStream(image)){copy(in,imageOut);}
         if(!RuntimeBundle.hash(imageOut).equals(bundle.manifest.getProperty("gsi.sha256")))throw new IOException("Selected GSI changed or does not match");platform.mode(imageOut,0444);
+        if(!bundle.imageComponents.isEmpty()){
+            progress.accept("RUNTIME_DERIVE_COMPONENTS_FROM_GSI");
+            try(ReadOnlyExt4 selected=new ReadOnlyExt4(imageOut)){
+                for(Map.Entry<String,String> item:bundle.imageComponents.entrySet()){
+                    File target=child(staging,item.getKey()),parent=target.getParentFile();
+                    if(!parent.isDirectory()&&!parent.mkdirs())throw new IOException("Cannot create derived runtime directory");
+                    GuestImageComponents.Recipe recipe=new GuestImageComponents.Recipe(target.getName(),item.getValue(),bundle.files.get(item.getKey()),bundle.componentBytes.get(item.getKey()));
+                    progress.accept("Deriving "+target.getName()+" from verified GSI");
+                    GuestImageComponents.extractOne(selected,parent,recipe,()->false);
+                    platform.mode(target,0644);
+                }
+            }
+        }
         for(String root:bundle.roots){File f=child(staging,root);if(Files.isSymbolicLink(f.toPath())||(!f.isDirectory()&&!f.isFile()))throw new IOException("Invalid runtime root");if(f.isDirectory())directoriesReadable(f,platform);}
         File stagedProfile=null;
         if(bundle.system.equals("evox")){

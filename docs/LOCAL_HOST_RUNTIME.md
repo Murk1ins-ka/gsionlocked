@@ -77,8 +77,9 @@ python tools/build_samsung_dispatch.py \
    the current published runtime does not contain it.
 2. Replace the internal S23 checks and device-specific paths with captured
    platform contracts, without simply deleting compatibility validation.
-3. Prepare guest APEX/runtime inputs from the selected GSI locally, so host
-   components come from the phone and do not require a full S23 runtime download.
+3. Package local guest-component recipes and the remaining bootstrap components
+   into the APK/catalog. Direct extraction and installer format 2 are implemented
+   below; published packages still use format 1.
 4. Adapt display/composer, input, vendor namespaces, service ownership and return
    across Samsung platforms/host SDKs. Java transaction signatures alone do not
    prove Parcelable layout or HAL/native compatibility.
@@ -88,3 +89,27 @@ python tools/build_samsung_dispatch.py \
 Current release downloads remain unchanged until a replacement backend is ready.
 The project goal remains active; implementing local extraction is an intermediate
 step toward it, not completion.
+
+## Local guest components (development)
+
+`ReadOnlyExt4` reads raw extent-based ext4 images without mounting them.
+`GuestImageComponents` reads APEX or nested compressed APEX ZIP streams and writes
+only declared payload names, checking exact length and SHA-256 before publication.
+It rejects unsupported filesystem features, malformed extents/directories,
+excessive nesting and existing output files. No native image utility is needed.
+
+On the selected ColorOS Find X9 Ultra IN image (SHA-256
+`a36ef550f4b2530fb9c7c6d363180d9eb4437e0497ebc87292697e4bf2a580b0`), all 27
+APEX payloads were extracted locally and matched the prepared runtime's pinned
+hashes. This validates image extraction, not another Samsung's boot compatibility.
+
+Runtime package format 2 keeps `sha.<target>` for each component and adds
+`image.<target>=/system/apex/<module>.apex` (or `.capex`) and `bytes.<target>`.
+Such entries must be absent from ZIP payloads. The installer first copies and
+hash-verifies the selected GSI, then derives these modules from that verified
+copy before publishing any runtime root. Format 1 remains supported.
+
+Run `python tools/test_image_components.py` for synthetic ext4/APEX fixtures,
+malformed input rejection, existing-data protection and complete format-2 file
+installation, including a bad module digest that must not publish runtime files.
+The released catalog and archives have not yet switched to this format.
