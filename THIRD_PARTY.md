@@ -20,3 +20,13 @@ The app's Samsung model/device/SoC recognition data is adapted from that revisio
 Profiles.kt. The OneLineage-derived `switcher/assets` session scripts are excluded
 from this new snapshot under upstream NOTICE's restriction on reuse outside OneOS.
 No new proprietary framework binaries or system images are included in this snapshot.
+
+## HyperOS preparation
+
+The HyperOS preparation uses the pinned OneOS patch source snapshot above and
+the earlier S23 compatibility adaptations. The copied ABI, networking and ART
+adaptation source under `runtime/hyperos-s23/patches` retains the project source
+license; see the upstream NOTICE and existing runtime attribution above.
+HyperOS/Xiaomi, Samsung and Android binaries remain external inputs and are not
+included in the source tree or relicensed as application code. This preparation
+does not import additional OneLineage-derived session assets.

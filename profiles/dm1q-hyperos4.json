@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "id": "dm1q-hyperos4-cn-sdk37",
+  "model": "SM-S911B",
+  "device": "dm1q",
+  "host_sdk": 36,
+  "host_services_sha256": "86a4fdbec4469440a8e6cf3670948689ba5cdcc8b6ad1a666ce9d693b4cc86c3",
+  "gsi": {
+    "name": "HyperOS 4 CN / Android 17",
+    "file": "hyper.img",
+    "sha256": "a0d622cff955e907b89bf7691d6d12102587bf9333ad89e92aebee0fe57b12ba",
+    "bytes": 7203971072,
+    "format": "raw-ext4",
+    "sdk": 37,
+    "abi": "arm64-v8a",
+    "build": "OS4.0.0.39.XPBCNXM"
+  },
+  "state": "offline-candidates-prepared-not-boot-validated",
+  "launch_enabled": false,
+  "credentials_and_biometrics": "unsupported",
+  "runtime": {
+    "bootstrap": "incomplete-hyperos-port",
+    "return_mode": "reboot",
+    "guest_apex_payloads_prepared": 34
+  }
+}

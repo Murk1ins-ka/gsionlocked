@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "date": "2026-10-26",
+  "state": "components-prepared-and-checksummed-not-boot-validated",
+  "launch_enabled": false,
+  "image_sha256": "a0d622cff955e907b89bf7691d6d12102587bf9333ad89e92aebee0fe57b12ba",
+  "host_model": "SM-S911B",
+  "host_sdk": 36,
+  "guest_sdk": 37,
+  "guest_apex_payloads": 34,
+  "candidate_sha256": {
+    "services_patched.jar": "708b41b9c756bfd2529e14cc5f1ee73512b0d4c2eca0e977313a6f77b7238750",
+    "framework_patched.jar": "1bbb245838662c455a41bb17510902ba3e9be595daa123cc6e68c7e0338ddaf8",
+    "service-art_patched.jar": "03c208bcaeb6d59c9fce0702d49def36b6d5f0efcdc5b7f79db9164032ae87ea",
+    "vold_patched": "b28497d96967fbd52e1f3236c0d7e36eedb0a28751e7948629965a2e1182c3fd",
+    "service.incremental_patched.so": "f19a1b57303e97916143e5ca5e9aaf5f30faaee4e64cc3268c63a35d532e7806"
+  },
+  "verified": [
+    "raw ext4 image identity and system metadata",
+    "framework assembly and unchanged JAR entries",
+    "corrected DEX magic, header size, file size and checksums",
+    "native modifications restricted to inspected byte ranges",
+    "image and all staged component hashes on the phone",
+    "original ART missing-field behavior and corrected Android Parcel round trip",
+    "host One UI, temporary root and SELinux Enforcing after preparation"
+  ],
+  "not_verified": [
+    "complete MIUI extension isolation",
+    "ART daemon profile namespace and application installation",
+    "full guest mount/classpath/property setup",
+    "HyperOS boot, desktop, input, network, camera and storage",
+    "return and recovery from a live HyperOS session"
+  ]
+}

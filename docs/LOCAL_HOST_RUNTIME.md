@@ -90,6 +90,18 @@ Current release downloads remain unchanged until a replacement backend is ready.
 The project goal remains active; implementing local extraction is an intermediate
 step toward it, not completion.
 
+### Assembler correction
+
+The early unshipped dispatch candidates used APKTool 3.0.3's API35 DEX writer.
+A live HyperOS ART class-loading probe found that it selected DEX041 magic but
+wrote a 112-byte header; Android requires a 120-byte container header for 041.
+Those old candidates are invalid and must not be installed. `AssembleSmali`
+now targets API34's legacy format and checks its header and size before returning.
+`tools/test_smali_assembler.py` checks magic, size, SHA-1, Adler32 and existing-file
+protection. The corrected HyperOS ART class passed a real Android parcel probe;
+this is still not a full guest boot test. Existing released runtime archives and
+the app's D8-built DEX do not use these unshipped candidate outputs.
+
 ## Local guest components (development)
 
 `ReadOnlyExt4` reads raw extent-based ext4 images without mounting them.
