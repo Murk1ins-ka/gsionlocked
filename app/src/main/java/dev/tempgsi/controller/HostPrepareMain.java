@@ -25,6 +25,38 @@ public final class HostPrepareMain {
         if(file.isDirectory()){File[] files=file.listFiles();if(files==null)throw new IOException("Cannot read own staging directory");for(File child:files)remove(child);}
         Files.deleteIfExists(file.toPath());
     }
+    private static String serviceState(String name)throws IOException {
+        Process process=new ProcessBuilder("/system/bin/getprop","init.svc."+name).redirectErrorStream(true).start();
+        try{
+            ByteArrayOutputStream result=new ByteArrayOutputStream();byte[] bytes=new byte[128];int n;
+            try(InputStream in=process.getInputStream()){while((n=in.read(bytes))!=-1){if(result.size()+n>256)throw new IOException("Unexpected init service state");result.write(bytes,0,n);}}
+            try{if(process.waitFor()!=0)throw new IOException("Cannot read init service state");}catch(InterruptedException e){Thread.currentThread().interrupt();throw new IOException("Init query interrupted",e);}
+            return result.toString("UTF-8").trim();
+        }finally{process.destroy();}
+    }
+    private static void composerFacts(Properties facts)throws Exception {
+        ArrayList<HostComposer.Service> services=new ArrayList<>();int count=0;long total=0;
+        for(String root:new String[]{"/system","/system_ext","/vendor","/odm","/product"}){
+            File directory=new File(root+"/etc/init");if(!directory.isDirectory())continue;
+            File[] files=directory.listFiles();if(files==null)throw new IOException("Cannot read system init directory");
+            Arrays.sort(files,Comparator.comparing(File::getName));
+            for(File file:files){
+                if(!file.getName().endsWith(".rc")||!file.isFile())continue;
+                String resolved=file.getCanonicalPath();
+                if(!resolved.matches("/(?:system|system_ext|vendor|odm|product)/.*"))throw new IOException("Init input outside system roots");
+                long size=file.length();total+=size;
+                if(++count>4096||size>2*1024*1024||total>32*1024*1024)throw new IOException("System init input exceeds discovery limits");
+                byte[] bytes=Files.readAllBytes(file.toPath());if(bytes.length!=size)throw new IOException("Init file changed during discovery");
+                services.addAll(HostComposer.parse(file.getPath(),new String(bytes,java.nio.charset.StandardCharsets.UTF_8)));
+            }
+        }
+        HostComposer.Service selected=HostComposer.select(services,HostPrepareMain::serviceState);
+        File executable=new File(selected.executable);
+        if(!executable.isFile()||!executable.getCanonicalPath().matches("/(?:system|system_ext|vendor|odm)/.*"))throw new IOException("Declared display composer executable missing or outside system roots");
+        facts.setProperty("composer.service",selected.name);facts.setProperty("composer.interface",selected.composerInterface());
+        facts.setProperty("composer.executable",selected.executable);facts.setProperty("composer.rc",selected.source);facts.setProperty("composer.rc.sha256",selected.sourceSha);
+        facts.setProperty("composer.discovery","declared-running");
+    }
     public static void main(String[] args){try{run(args);}catch(Throwable e){e.printStackTrace(System.out);System.exit(1);}}
     static void run(String[] args)throws Exception {
         if(android.os.Process.myUid()!=0||args.length!=0)throw new IOException("Root host preparation takes no external paths");
@@ -36,8 +68,15 @@ public final class HostPrepareMain {
             Properties facts=new Properties();facts.setProperty("manufacturer",Build.MANUFACTURER);facts.setProperty("brand",Build.BRAND);
             facts.setProperty("model",Build.MODEL);facts.setProperty("device",Build.DEVICE);facts.setProperty("soc",Build.SOC_MODEL);
             facts.setProperty("sdk",Integer.toString(Build.VERSION.SDK_INT));facts.setProperty("kernel",System.getProperty("os.version","unknown"));
+            try{composerFacts(facts);}catch(IOException unsupported){
+                // Input capture remains useful, but the common launch candidate requires discovery.
+                for(String name:new ArrayList<>(facts.stringPropertyNames()))if(name.startsWith("composer."))facts.remove(name);
+                facts.setProperty("composer.discovery","unresolved");
+                System.out.println("HOST_COMPOSER_UNRESOLVED=1");
+            }
             String services=RuntimeBundle.hash(immutableFile("/system/framework/services.jar")),framework=RuntimeBundle.hash(immutableFile("/system/framework/framework.jar"));
-            StringBuilder identity=new StringBuilder("host-v1\n"+Build.VERSION.SDK_INT+"\n"+services+"\n"+framework);Map<String,String> libraries=new TreeMap<>();
+            StringBuilder identity=new StringBuilder("host-v2\n"+Build.VERSION.SDK_INT+"\n"+services+"\n"+framework);Map<String,String> libraries=new TreeMap<>();
+            for(String name:new TreeSet<>(facts.stringPropertyNames()))identity.append('\n').append(name).append('=').append(facts.getProperty(name));
             for(String name:HostSystemRuntime.LIBRARIES){File source=immutableFile("/system/lib64/"+name);String sha=source.isFile()?RuntimeBundle.hash(source):"missing";libraries.put(name,sha);identity.append('\n').append(name).append('=').append(sha);}
             String key=RuntimeBundle.hash(new ByteArrayInputStream(identity.toString().getBytes("UTF-8")));
             File destination=new File(ROOT,key);Properties profile;
@@ -57,6 +96,10 @@ public final class HostPrepareMain {
             }
             System.out.println("HOST_INSTALLD_METHODS="+profile.getProperty("installd.methods"));
             System.out.println("HOST_MAP_SHA256="+profile.getProperty("sha.installd.properties"));
+            if("declared-running".equals(profile.getProperty("host.composer.discovery"))){
+                System.out.println("HOST_COMPOSER_SERVICE="+profile.getProperty("host.composer.service"));
+                System.out.println("HOST_COMPOSER_INTERFACE="+profile.getProperty("host.composer.interface"));
+            }
             System.out.println("HOST_PREPARED="+destination.getPath());
             System.out.println("System-only host inputs copied to private staging. No account, key, user app data or system partition was changed.");
         }

@@ -41,7 +41,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='gsi-components-') as name:
         tmp=Path(name);classes=tmp/'classes';classes.mkdir()
         sources=ROOT/'app/src/main/java/dev/tempgsi/controller'
-        subprocess.run([javac,'-encoding','UTF-8','-d',str(classes),*[str(sources/(n+'.java')) for n in ('GsiFormat','ReadOnlyExt4','GuestImageComponents','RuntimeBundle','RuntimeFiles','RuntimeProfile')],str(ROOT/'tests/ImageComponentInstallTest.java')],check=True)
+        subprocess.run([javac,'-encoding','UTF-8','-d',str(classes),*[str(sources/(n+'.java')) for n in ('GsiFormat','ReadOnlyExt4','GuestImageComponents','RuntimeBundle','RuntimeFiles','RuntimeProfile')],str(ROOT/'tests/ImageComponentInstallTest.java'),str(ROOT/'tools/DeriveRuntimePackage.java')],check=True)
         data=bytes(range(256))*32;digest=hashlib.sha256(data).hexdigest()
         props=tmp/'recipe.properties'
         props.write_text(f'format=1\noutputs=test_payload.img\nsource.test_payload.img=/system/apex/test.apex\nsha.test_payload.img={digest}\nbytes.test_payload.img={len(data)}\n')
@@ -81,6 +81,15 @@ def main():
             entries.insert(0,('runtime.properties',''.join(k+'='+v+'\n' for k,v in values.items()).encode()))
             package=tmp/('runtime-'+str(valid)+'.zip');package.write_bytes(archive(entries))
             subprocess.run([runtime,'-cp',str(classes),PACKAGE+'ImageComponentInstallTest',str(image),str(package),str(tmp/('installed-'+str(valid))),'accept' if valid else 'reject'],check=True)
+            if valid:
+                original=dict(values);original['format']='1';del original['image.oneos/test_payload.img'];del original['bytes.oneos/test_payload.img']
+                base=tmp/'original-runtime.zip';base.write_bytes(archive([('runtime.properties',''.join(k+'='+v+'\n' for k,v in original.items()).encode()),*entries[1:],('payload/oneos/test_payload.img',data)]))
+                converted=tmp/'converted-runtime.zip';base_hash=hashlib.sha256(base.read_bytes()).hexdigest()
+                command=[runtime,'-cp',str(classes),'DeriveRuntimePackage',str(base),base_hash,str(props),str(converted)]
+                subprocess.run(command,check=True,capture_output=True)
+                with zipfile.ZipFile(converted) as z:assert 'payload/oneos/test_payload.img' not in z.namelist()
+                subprocess.run([runtime,'-cp',str(classes),PACKAGE+'ImageComponentInstallTest',str(image),str(converted),str(tmp/'installed-converted'),'accept'],check=True)
+                saved=converted.read_bytes();assert subprocess.run(command,capture_output=True).returncode and saved==converted.read_bytes()
     print('Image components: direct/CAPEX integrity, malformed ext4, nesting and existing-data checks passed')
 
 if __name__=='__main__':main()

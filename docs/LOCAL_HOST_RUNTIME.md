@@ -113,3 +113,35 @@ Run `python tools/test_image_components.py` for synthetic ext4/APEX fixtures,
 malformed input rejection, existing-data protection and complete format-2 file
 installation, including a bad module digest that must not publish runtime files.
 The released catalog and archives have not yet switched to this format.
+
+`tools/DeriveRuntimePackage.java` converts an authenticated format-1 ColorOS
+archive using those pinned recipes, verifies the resulting format-2 archive,
+and preserves existing outputs. It retains all framework/script guards.
+The local conversion removed 298,369,024 unpacked bytes (27 APEX payloads),
+reducing the compressed candidate from 555,545,955 to 422,264,379 bytes.
+The remaining archive still includes bootstrap patches and application assets;
+this is not yet a runtime-free APK. Conversion plus installation is covered by
+the synthetic image tests. No new runtime archive has been published.
+
+## Host display service discovery (development)
+
+The host capture also reads bounded `.rc` files directly within immutable
+`/{system,system_ext,vendor,odm,product}/etc/init` directories. It identifies a
+unique running service declaring the default composer AIDL or HIDL interface.
+It records the service name, interface, executable, source path and source hash;
+these facts participate in the capsule cache identity. No service is restarted
+during capture. Imports, properties and init commands are not executed.
+
+The candidate integration now uses this captured service instead of the fixed
+Qualcomm service name, and checks its captured AIDL/HIDL interface for readiness.
+Missing, duplicate or critical service definitions prevent candidate takeover.
+This is deliberately conservative: imports outside the scanned directories,
+property-expanded executable paths and override ordering are not resolved yet.
+Such hosts retain their captured Binder/library inputs but report an unresolved
+display service. This discovery does not by itself enable another device.
+
+Fixture tests cover Qualcomm-style HIDL and Samsung-style AIDL declarations,
+line continuations and quoting, stopped services, duplicate/critical services,
+action-section boundaries and invalid executable paths. Generated candidate
+shell scripts pass syntax checks; real service discovery/restart on hardware
+has not been tested. See the [Android init language reference](https://android.googlesource.com/platform/system/core/+/refs/heads/main/init/README.md).

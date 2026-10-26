@@ -11,7 +11,7 @@ public final class HostSystemRuntime {
         void mode(File file,int mode)throws Exception;
     }
     static final String[] LIBRARIES={"libbase.so","libbinder.so","libbinder_ndk.so","libutils.so","libcutils.so","liblog.so","libc++.so"};
-    static final Set<String> FACTS=new HashSet<>(Arrays.asList("manufacturer","brand","model","device","soc","sdk","vendor.api","kernel"));
+    static final Set<String> FACTS=new HashSet<>(Arrays.asList("manufacturer","brand","model","device","soc","sdk","vendor.api","kernel","composer.service","composer.interface","composer.executable","composer.rc","composer.rc.sha256","composer.discovery"));
     static void store(File file,Properties values)throws IOException {
         try(FileOutputStream out=new FileOutputStream(file)){values.store(out,"Generated from this host's system; contains no user data");out.getFD().sync();}
     }
