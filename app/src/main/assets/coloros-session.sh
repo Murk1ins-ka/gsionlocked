@@ -4,6 +4,8 @@ S=/data/local/tmp/oneos
 BB=/data/adb/ksu/bin/busybox
 fail() { echo "Проверка не пройдена: $*"; exit 2; }
 [ "$(id -u)" = 0 ] || fail 'нет root'
+[ "$(getprop ro.product.manufacturer | tr '[:upper:]' '[:lower:]')" = samsung ] || fail 'поддерживаются только телефоны Samsung'
+[ "$(getprop ro.product.brand | tr '[:upper:]' '[:lower:]')" = samsung ] || fail 'поддерживаются только телефоны Samsung'
 [ "$(getprop ro.build.version.sdk)" = 36 ] || fail 'запуск разрешён только из One UI Android 16'
 [ "$(getprop ro.product.cpu.abi)" = arm64-v8a ] || fail 'нужна архитектура arm64-v8a'
 [ "$(getenforce)" = Enforcing ] || fail 'состояние One UI не подтверждено'

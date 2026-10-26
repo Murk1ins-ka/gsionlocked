@@ -8,15 +8,26 @@
 <p align="center"><a href="https://github.com/Murk1ins-ka/gsionlocked/releases">Downloads</a> · <a href="docs/SETUP.md">Setup</a> · <a href="https://github.com/Murk1ins-ka/gsionlocked/issues">Known issues</a> · <a href="https://t.me/gsionlocked">Telegram</a> · <a href="README.ru.md">Русский</a></p>
 
 > [!IMPORTANT]
-> Experimental preview. Install the matching runtime through **Install runtime** after importing your image. Initial packages require the compatible S23/FZG1 host framework; other phones need their own port.
+> **Samsung phones only.** Experimental preview. Install the matching runtime through **Install runtime** after importing your image. Initial packages require the compatible S23/FZG1 host framework; other Samsung phones need their own port.
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
+
+### 0.3.1: Samsung compatibility and OneOS porting sources
+
+The app now rejects non-Samsung hosts and provides **Compatibility / Совместимость**
+with a local identity report. Thirteen Samsung model/device/SoC tuples from OneOS
+are recognized for porting; **they are not newly enabled launch profiles**.
+The imported source kit includes framework patchers, native/overlay sources,
+staging contracts and hash tables. OneLineage-derived session scripts are excluded
+under upstream NOTICE. Current downloadable runtimes still target S23/FZG1;
+Android 17 and other Samsung backends are not implemented by this update.
+[Porting status, model table and required work](docs/SAMSUNG_PORTING.md).
 
 ### Download and install / Скачать и установить
 
 **English instructions below. [Инструкция на русском](README.ru.md#как-правильно-скачать-и-установить).**
 
-1. Open [v0.3.0 runtime preview](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.3.0-runtime-preview), expand **Assets**, and download **`gsionlocked.apk`**. The GitHub **Source code** ZIP/TAR and `gsionlocked-source.zip` are for developers, not Android installers.
+1. Open [v0.3.1 Samsung preview](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.3.1-samsung-preview), expand **Assets**, and download **`gsionlocked.apk`**. The GitHub **Source code** ZIP/TAR and `gsionlocked-source.zip` are for developers, not Android installers.
 2. Open [GSI image downloads in v0.2.0](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.2.0-coloros-preview). Download **one system**:
    - **Evolution X:** `EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img.xz`.
    - **ColorOS:** **all four** `OneOS_ColorOS17_FindX9Ultra_IN.img.zip.001` through `.004`, saved together in one folder.
@@ -38,7 +49,7 @@ installation and guest boot have not yet been validated.
 
 ### 0.2.1: model-name restriction removed
 
-Model/codename and bootloader-name allowlists no longer block the app/new loader
+Model/codename and bootloader-name allowlists no longer block Samsung hosts in the app/new loader
 source. The current loader still requires **Android 16 / ARM64**, root and a
 compatible prepared runtime. Other models are **untested**, not universally
 supported. ColorOS still verifies the host framework digest and pinned S23

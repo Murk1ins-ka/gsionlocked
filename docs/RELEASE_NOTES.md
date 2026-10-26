@@ -1,3 +1,13 @@
+# 0.3.1-samsung-preview
+
+Samsung-only host checks, local Compatibility report, and 13 OneOS reference
+identity tuples. Added 106 pinned OneOS porting source files, provenance checks
+and an offline overlay hash validator. OneLineage-derived session assets are
+excluded under upstream NOTICE. **No new device runtime or Android 17 backend
+is enabled.** Existing S23/FZG1 runtime downloads stay on the 0.3.0 release.
+Desktop tests and APK build/signature checks passed; no phone was used.
+See [Samsung porting status](SAMSUNG_PORTING.md).
+
 # 0.3.0-runtime-preview
 
 Added **Install runtime** for the exact supported ColorOS/EvoX images. The APK

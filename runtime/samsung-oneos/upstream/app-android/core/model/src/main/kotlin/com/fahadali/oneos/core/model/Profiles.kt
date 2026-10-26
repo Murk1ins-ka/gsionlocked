@@ -1,0 +1,414 @@
+package com.fahadali.oneos.core.model
+
+import java.util.Locale
+
+/**
+ * One image a profile may run, with the file set staged next to it (built
+ * from that image by scripts/make-overlays.sh). The staged image decides the
+ * set: never another set with that image, never this set with another image.
+ */
+data class ImageChoice(
+    /** [ImageRef.id]. */
+    val imageId: String,
+    /** [PackageSet.id] staged next to that image on this phone. */
+    val packageSetId: String,
+    /** A session has run on this phone with this image; false = the untested tick at Switch. */
+    val tested: Boolean,
+)
+
+/**
+ * A phone this build has OS images and file sets for (build 2, AA3). A
+ * phone matches only when its model number starts with [modelPrefix] AND
+ * `ro.product.device` is [codename] AND its SoC model is [socModel]. The probe
+ * builds matched model OR codename (the old TestedDevice), which would have
+ * let an Exynos variant or a renamed model through.
+ */
+data class PhoneProfile(
+    /** Stable id: `ONEOS_PROFILE` in session.env, the stage marker, logs. */
+    val id: String,
+    /** "Galaxy S26 Ultra". */
+    val label: String,
+    /** `SM-S948`: every regional variant (U, B, N, W, 0) starts with it. */
+    val modelPrefix: String,
+    /** `ro.product.device`, e.g. `m3q`. */
+    val codename: String,
+    /** `ro.soc.model` (or the model of `ro.board.platform` when the prop is empty), e.g. `SM8850`. */
+    val socModel: String,
+    /** BAR profiles get the phone form in session.env and no fold steps. */
+    val form: FormFactor,
+    /** The images this phone may run, each with its set (0.3.3: more than one); the first is its usual one. */
+    val choices: List<ImageChoice>,
+    /** False: known, but this build refuses to switch ([disabledReason] is the BLOCK). */
+    val enabled: Boolean = true,
+    val disabledReason: String? = null,
+    /** Extra switch-time warnings for this phone (no tick needed). */
+    val notes: List<Finding> = emptyList(),
+) {
+    fun matches(model: String, device: String, soc: String): Boolean =
+        model.trim().uppercase(Locale.ROOT).startsWith(modelPrefix) &&
+            device.trim().equals(codename, ignoreCase = true) &&
+            soc.trim().equals(socModel, ignoreCase = true)
+
+    fun matches(f: DeviceFacts): Boolean = matches(f.model, f.device, f.soc.model)
+
+    /** The choice for [imageId]; null = this phone does not take that image. */
+    fun choice(imageId: String): ImageChoice? = choices.firstOrNull { it.imageId == imageId }
+
+    /** The images of [choices] this build has, in order. */
+    fun images(all: List<ImageRef> = Images.ALL): List<ImageRef> = choices.mapNotNull { Images.byId(it.imageId, all) }
+
+    /** The choice "Choose a system" preselects: the first one that has run on this phone, else the first. */
+    val recommended: ImageChoice? get() = choices.firstOrNull { it.tested } ?: choices.firstOrNull()
+
+    /** Some image has run on this phone (the device report's "Tested phone"). */
+    val testedWithAnyImage: Boolean get() = choices.any { it.tested }
+
+    /** "SM-S948* / m3q / SM8850". */
+    val ids: String get() = "$modelPrefix* / $codename / $socModel"
+}
+
+/** [profile] is the one profile all three ids match; null when none (or, fail closed, more than one) does. */
+data class ProfileResolution(
+    val profile: PhoneProfile?,
+    /** When nothing matched: the profile with the same model prefix (else codename), for the message. */
+    val nearest: PhoneProfile?,
+    /** What differs from [nearest], e.g. "codename pa3q (profile: m3q)". */
+    val mismatches: List<String>,
+)
+
+/** The phones build 2 knows (PLAN.md "Profiles"). Built in; fix packs take this over later. */
+object Profiles {
+    const val ID_F8U = "f8u"
+    const val ID_S_ULTRA_8850 = "s-ultra-8850"
+    const val ID_S_ULTRA_8750 = "s-ultra-8750"
+    const val ID_S_8750 = "s-8750"
+    const val ID_FOLD7 = "f7"
+    const val ID_S_PLUS_8750 = "s-plus-8750"
+    const val ID_FOLD8 = "f8"
+    const val ID_S_8850 = "s-8850"
+    const val ID_S_8850_JP = "s-8850-jp"
+    const val ID_S_PLUS_8850 = "s-plus-8850"
+    const val ID_S_ULTRA_8650 = "s-ultra-8650"
+    const val ID_S_8550 = "s-8550"
+    const val ID_S_PLUS_8550 = "s-plus-8550"
+
+    /** The SM8750 and SM8650 phones' note ([PhoneProfile.notes]) and its [Finding.reason]. */
+    const val ID_NOTE_OLDER_VENDOR = "profile-vendor-older"
+    const val R_OLDER_VENDOR = "older-vendor"
+
+    /** The SM8550 phones' note: the system will most likely not start there. */
+    const val ID_NOTE_EXPECT_NO_START = "profile-expect-no-start"
+    const val R_EXPECT_NO_START = "expect-no-start"
+
+    /**
+     * Both S Ultra profiles and the Galaxy S25: the Find X9 Ultra CN build,
+     * tested on all three (owner, 2026-10-25; 0.3.3-0.3.6 also took the IN build,
+     * gone in 0.3.7). The set is
+     * named for the S Ultra but holds nothing per phone beyond the bar form (no
+     * fold grid).
+     */
+    /**
+     * 0.4.11: the Find X9 Ultra IN (global) build on every bar phone that
+     * takes the CN build, listed first (owner: "IN build is just better").
+     * Untested, so a phone where the CN build has run still preselects that.
+     */
+    private val X9U_IN_CHOICE = ImageChoice(Images.ID_FIND_X9U_IN, PackageSets.ID_X9U_IN_SULTRA, tested = false)
+
+    private val S_ULTRA_CHOICES = listOf(
+        X9U_IN_CHOICE,
+        ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = true),
+    )
+
+    private fun olderVendor(vendorApi: String, kernel: String) = Finding(
+        ID_NOTE_OLDER_VENDOR, Level.WARN, "Older vendor software",
+        "This phone has vendor API $vendorApi and kernel $kernel; the other systems' display path has only run on " +
+            "vendor API 202504 (Snapdragon 8 Elite Gen 5).",
+        R_OLDER_VENDOR,
+    )
+
+    /** The SM8750 phones (S25 Ultra, S25, S25+, Z Fold7): vendor API 202404 and kernel 6.6. */
+    private val OLDER_VENDOR = olderVendor("202404", "6.6")
+
+    /**
+     * The SM8550 phones (Galaxy S23, S23+): vendor API 33 (Android 13) and
+     * kernel 5.15, and only the HIDL display composer (their probe reports
+     * list no android.hardware.graphics.composer3.IComposer, which the S24
+     * Ultra and newer have and the guests' SurfaceFlinger talks to).
+     * Offered at the owner's request (2026-10-25) so
+     * a failed start comes back as logs: the black-screen auto-return
+     * (oneos_switch.sh, ONEOS_RETURN_BLACK) brings One UI back.
+     */
+    private val EXPECT_NO_START = Finding(
+        ID_NOTE_EXPECT_NO_START, Level.WARN, "Will most likely not start",
+        "This phone has vendor API 33 (Android 13) and kernel 5.15; the other systems have only run on " +
+            "vendor API 202404 and newer. If the screen stays black, OneOS returns to One UI by itself; " +
+            "share the session logs afterwards.",
+        R_EXPECT_NO_START,
+    )
+
+    /** The Switch tick for [ID_NOTE_EXPECT_NO_START]. */
+    fun expectNoStartAck(system: String = Images.OTHER_SYSTEM): String =
+        "I understand $system will most likely not start on this phone, and I'll share the session logs after"
+
+    val F8U = PhoneProfile(
+        id = ID_F8U,
+        label = "Z Fold (F8U)",
+        modelPrefix = "SM-F976",
+        codename = "q8q",
+        socModel = "SM8850",
+        form = FormFactor.FOLD,
+        choices = listOf(
+            ImageChoice(Images.ID_FIND_N6, PackageSets.ID_N6_F8U, tested = true),
+            // 0.3.7: the Pixel 11 Fold image with its set, on this phone only.
+            // Tested: runs 41-44 booted it here (staged over adb by
+            // scripts/deploy-phone.sh, not yet from the app).
+            ImageChoice(Images.ID_PIXEL_YOGI, PackageSets.ID_PIXEL_F8U, tested = true),
+        ),
+    )
+
+    val S_ULTRA_8850 = PhoneProfile(
+        id = ID_S_ULTRA_8850,
+        label = "Galaxy S26 Ultra",
+        modelPrefix = "SM-S948",
+        codename = "m3q",
+        socModel = "SM8850",
+        form = FormFactor.BAR,
+        // 0.4.10: the Pixel 11 Pro image too, untested. SM8850 has the SVE that
+        // Pixel's system code needs; the SM8750 phones do not.
+        choices = S_ULTRA_CHOICES + ImageChoice(Images.ID_PIXEL_KODIAK, PackageSets.ID_PIXEL_SULTRA, tested = false),
+    )
+
+    val S_ULTRA_8750 = PhoneProfile(
+        id = ID_S_ULTRA_8750,
+        label = "Galaxy S25 Ultra",
+        modelPrefix = "SM-S938",
+        codename = "pa3q",
+        socModel = "SM8750",
+        form = FormFactor.BAR,
+        // Off in 0.3.0 (the S26 Ultra was to go first); on from 0.3.1 (owner: the
+        // friend's S25 Ultra is on Android 17 and ready). Untested: ticks as the S26 Ultra.
+        choices = S_ULTRA_CHOICES,
+        notes = listOf(OLDER_VENDOR),
+    )
+
+    /**
+     * Galaxy S25 (base), from 0.3.4: a friend's probe findings of 2026-10-23
+     * (SM-S931B, pa1q, SM8750, One UI 9.0, Android 17, one 1080 x 2340
+     * panel, no hinge, installd table identical to switcher/patches/
+     * host_installd.txt, 85 methods). Not an S Ultra, so its explicit profile
+     * is what puts it in scope
+     * ([CompatEvaluator.inScope]); it takes the S Ultra image and set, untested.
+     */
+    val S_8750 = PhoneProfile(
+        id = ID_S_8750,
+        label = "Galaxy S25",
+        modelPrefix = "SM-S931",
+        codename = "pa1q",
+        socModel = "SM8750",
+        form = FormFactor.BAR,
+        choices = S_ULTRA_CHOICES,
+        notes = listOf(OLDER_VENDOR),
+    )
+
+    /**
+     * Galaxy Z Fold7, from 0.4.8: a probe report of 2026-10-25 (SM-F966B, q7q,
+     * SM8750, One UI 9.0, Android 17, vendor API 202404, kernel 6.6). Laid
+     * out like the Z Fold8 Ultra: inner panel on port 147 and cover on 148
+     * (1968 x 2184 and 1080 x 2520, density 420), sec_touchscreen and
+     * sec_touchscreen2 on those ports, device states 0 CLOSE and 3 OPEN, a
+     * "flip" lid switch, and an installd table identical to
+     * switcher/patches/host_installd.txt (85 methods). It takes the Find N6
+     * image with the Fold's set, untested. No Pixel image: Pixel's system
+     * code uses SVE in every process (RefBase's constructor), which SM8750
+     * does not have.
+     */
+    val FOLD7 = PhoneProfile(
+        id = ID_FOLD7,
+        label = "Galaxy Z Fold7",
+        modelPrefix = "SM-F966",
+        codename = "q7q",
+        socModel = "SM8750",
+        form = FormFactor.FOLD,
+        choices = listOf(ImageChoice(Images.ID_FIND_N6, PackageSets.ID_N6_F8U, tested = false)),
+        notes = listOf(OLDER_VENDOR),
+    )
+
+    /**
+     * Galaxy S25+, from 0.4.10: a probe report of 2026-10-25 (SM-S936B, pa2q,
+     * SM8750, One UI 9.0, Android 17, vendor API 202404, one panel on port
+     * 147, density 450, installd table identical to
+     * switcher/patches/host_installd.txt). The Galaxy S25's image and set,
+     * untested. No Pixel image (SVE).
+     */
+    val S_PLUS_8750 = PhoneProfile(
+        id = ID_S_PLUS_8750,
+        label = "Galaxy S25+",
+        modelPrefix = "SM-S936",
+        codename = "pa2q",
+        socModel = "SM8750",
+        form = FormFactor.BAR,
+        choices = listOf(X9U_IN_CHOICE, ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = false)),
+        notes = listOf(OLDER_VENDOR),
+    )
+
+    /**
+     * Galaxy Z Fold8, from 0.4.10: a probe report of 2026-10-25 (SM-F971B, h8q,
+     * SM8850, One UI 9.0, Android 17, vendor API 202504 like the Z Fold8 Ultra,
+     * kernel 6.12). The Z Fold8 Ultra's ports and touch screens (inner 147 on
+     * sec_touchscreen, cover 148 on sec_touchscreen2), a flip lid switch and an
+     * identical installd table; other panels (about 1848 x 2448 and 1248 x
+     * 1972, density 420) and one more device state, 1 TENT, which the fold
+     * layout now takes from the phone (guest_start.sh). It takes the Fold's
+     * images and sets, untested; the Pixel display configs are the Z Fold8
+     * Ultra's only, so its Pixel keeps the image's own brightness.
+     */
+    val FOLD8 = PhoneProfile(
+        id = ID_FOLD8,
+        label = "Galaxy Z Fold8",
+        modelPrefix = "SM-F971",
+        codename = "h8q",
+        socModel = "SM8850",
+        form = FormFactor.FOLD,
+        choices = listOf(
+            ImageChoice(Images.ID_FIND_N6, PackageSets.ID_N6_F8U, tested = false),
+            ImageChoice(Images.ID_PIXEL_YOGI, PackageSets.ID_PIXEL_F8U, tested = false),
+        ),
+    )
+
+    /** The Galaxy S26's images: the S Ultra's, both untested. */
+    private val S_8850_CHOICES = listOf(
+        X9U_IN_CHOICE,
+        ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = false),
+        ImageChoice(Images.ID_PIXEL_KODIAK, PackageSets.ID_PIXEL_SULTRA, tested = false),
+    )
+
+    /**
+     * Galaxy S26 (base), from 0.4.11: a probe report of 2026-10-25 from the
+     * Japanese carrier model (SC-51G, m1q, SM8850, One UI 9.0, Android 17,
+     * vendor API 202504 and kernel 6.12 like the Z Fold8 Ultra, one panel on
+     * port 147, density 480, SVE and SME, installd 85 methods). One profile
+     * per model number: SM-S942 everywhere else, [S_8850_JP] for SC-51G. The
+     * Exynos S26 has another chip and matches neither.
+     */
+    val S_8850 = PhoneProfile(
+        id = ID_S_8850,
+        label = "Galaxy S26",
+        modelPrefix = "SM-S942",
+        codename = "m1q",
+        socModel = "SM8850",
+        form = FormFactor.BAR,
+        choices = S_8850_CHOICES,
+    )
+
+    val S_8850_JP = S_8850.copy(id = ID_S_8850_JP, label = "Galaxy S26 (docomo)", modelPrefix = "SC-51G")
+
+    /**
+     * Galaxy S26+, from 0.4.12: a probe report of 2026-10-25 (SM-S947U, m2q,
+     * SM8850, One UI 9.0, Android 17, vendor API 202504 and kernel 6.12, one
+     * 1440 x 3120 panel on port 147 at density 600, a centre camera hole,
+     * Android's Bluetooth audio HAL and AIDL composer like the S26 Ultra, SVE
+     * and SME, installd 85 methods). The Galaxy S26's images and sets, untested.
+     */
+    val S_PLUS_8850 = PhoneProfile(
+        id = ID_S_PLUS_8850,
+        label = "Galaxy S26+",
+        modelPrefix = "SM-S947",
+        codename = "m2q",
+        socModel = "SM8850",
+        form = FormFactor.BAR,
+        choices = S_8850_CHOICES,
+    )
+
+    /**
+     * Galaxy S24 Ultra, from 0.4.11: a probe report of 2026-10-25 (SM-S928B,
+     * e3q, SM8650, One UI 9.0, Android 17, vendor API 34, kernel 6.1, one
+     * panel on port 147, density 450, no SVE or SME, installd 85 methods).
+     * The S Ultra's image and set, untested. No Pixel image (SVE).
+     */
+    val S_ULTRA_8650 = PhoneProfile(
+        id = ID_S_ULTRA_8650,
+        label = "Galaxy S24 Ultra",
+        modelPrefix = "SM-S928",
+        codename = "e3q",
+        socModel = "SM8650",
+        form = FormFactor.BAR,
+        choices = listOf(X9U_IN_CHOICE, ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = false)),
+        notes = listOf(olderVendor("34 (Android 14)", "6.1")),
+    )
+
+    /**
+     * Galaxy S23 and S23+, from 0.4.11: probe reports of 2026-10-25
+     * (SM-S911B dm1q and SM-S916U dm2q, SM8550, One UI 9.0, Android 17, one
+     * panel on port 147, no SVE or SME, installd 85 methods). The S Ultra's
+     * image and set with [EXPECT_NO_START].
+     */
+    val S_8550 = PhoneProfile(
+        id = ID_S_8550,
+        label = "Galaxy S23",
+        modelPrefix = "SM-S911",
+        codename = "dm1q",
+        socModel = "SM8550",
+        form = FormFactor.BAR,
+        choices = listOf(X9U_IN_CHOICE, ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = false)),
+        notes = listOf(EXPECT_NO_START),
+    )
+
+    val S_PLUS_8550 = PhoneProfile(
+        id = ID_S_PLUS_8550,
+        label = "Galaxy S23+",
+        modelPrefix = "SM-S916",
+        codename = "dm2q",
+        socModel = "SM8550",
+        form = FormFactor.BAR,
+        choices = listOf(X9U_IN_CHOICE, ImageChoice(Images.ID_FIND_X9U, PackageSets.ID_X9U_SULTRA, tested = false)),
+        notes = listOf(EXPECT_NO_START),
+    )
+
+    val BUILT_IN: List<PhoneProfile> = listOf(
+        F8U, S_ULTRA_8850, S_ULTRA_8750, S_8750, FOLD7, S_PLUS_8750, FOLD8,
+        S_8850, S_8850_JP, S_ULTRA_8650, S_8550, S_PLUS_8550, S_PLUS_8850,
+    )
+
+    /** `ro.build.version.oneui` values seen on profiled phones (all One UI 9.0). */
+    val ONE_UI_SEEN: Set<Int> = setOf(90000)
+
+    fun byId(id: String, profiles: List<PhoneProfile> = BUILT_IN): PhoneProfile? = profiles.firstOrNull { it.id == id }
+
+    fun resolve(f: DeviceFacts, profiles: List<PhoneProfile> = BUILT_IN): ProfileResolution =
+        resolve(f.model, f.device, f.soc.model, profiles)
+
+    fun resolve(model: String, device: String, soc: String, profiles: List<PhoneProfile> = BUILT_IN): ProfileResolution {
+        val hits = profiles.filter { it.matches(model, device, soc) }
+        if (hits.size == 1) return ProfileResolution(hits.single(), null, emptyList())
+        if (hits.size > 1) {
+            return ProfileResolution(null, null, listOf("matches ${hits.size} profiles (${hits.joinToString { it.id }})"))
+        }
+        val m = model.trim().uppercase(Locale.ROOT)
+        val nearest = profiles.firstOrNull { m.startsWith(it.modelPrefix) }
+            ?: profiles.firstOrNull { device.trim().equals(it.codename, ignoreCase = true) }
+            ?: return ProfileResolution(null, null, emptyList())
+        val diff = mutableListOf<String>()
+        if (!m.startsWith(nearest.modelPrefix)) diff += "model ${model.trim()} (profile: ${nearest.modelPrefix}*)"
+        if (!device.trim().equals(nearest.codename, ignoreCase = true)) {
+            diff += "codename ${device.trim().ifEmpty { "unknown" }} (profile: ${nearest.codename})"
+        }
+        if (!soc.trim().equals(nearest.socModel, ignoreCase = true)) {
+            diff += "chip ${soc.trim().ifEmpty { "unknown" }} (profile: ${nearest.socModel})"
+        }
+        return ProfileResolution(null, nearest, diff)
+    }
+}
+
+/** Android release names for the SDK levels OneOS meets. */
+object AndroidRelease {
+    fun name(sdk: Int): String = when (sdk) {
+        31 -> "12"
+        32 -> "12L"
+        33 -> "13"
+        34 -> "14"
+        35 -> "15"
+        36 -> "16"
+        37 -> "17"
+        else -> "SDK $sdk"
+    }
+}

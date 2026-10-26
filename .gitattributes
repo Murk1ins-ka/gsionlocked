@@ -6,3 +6,5 @@
 *.sh text eol=lf
 *.md text eol=lf
 *.png binary
+# Preserve the pinned upstream source bytes for cross-platform provenance checks.
+runtime/samsung-oneos/upstream/** -text

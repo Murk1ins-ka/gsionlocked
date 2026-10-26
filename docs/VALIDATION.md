@@ -1,5 +1,14 @@
 # Validation — 2026-10-25
 
+## 0.3.1 Samsung scope — 2026-10-26
+
+- Desktop tests reject non-Samsung manufacturer/brand combinations and preserve
+  Android 16 / ARM64 requirements. All 13 upstream identity tuples are checked
+  against wrong SoCs and codenames; recognition does not grant launch permission.
+- The source kit has 106 pinned source files, verified against provenance hashes.
+  The ColorOS wrapper checks Samsung before any session operation.
+- No phone was used and no new Samsung runtime or Android 17 backend was tested.
+
 ## 0.3.0 runtime installer — offline
 
 - APK compilation and signing passed. Both authenticated runtime ZIPs were

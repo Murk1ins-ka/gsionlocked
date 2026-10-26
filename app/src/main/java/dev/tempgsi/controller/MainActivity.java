@@ -42,7 +42,8 @@ public final class MainActivity extends Activity {
         Ui.space(page,28);
         LinearLayout card=Ui.card(page);imageLabel=Ui.text(card,inside?(ColorOsProfile.guest()?"ColorOS 17 is running":"EvoX is running"):selectedName,18,Ui.TEXT);memory=Ui.text(card,memoryLabel(),14,Ui.MUTED);
         status=Ui.text(card,inside?(ColorOsProfile.guest()?"Return: app button or both volume keys for 3 seconds.":"Hold both volume buttons for 2 seconds to return to OneUI."):"First setup: import .img → Install runtime → Start",14,Ui.MUTED);Ui.space(page,8);
-        if(!inside&&!DeviceProfile.testedHost())Ui.text(card,"Модель не ограничена. На других устройствах запуск не проверен; нужен совместимый подготовленный runtime. Текущий загрузчик: Android 16 / arm64.",12,Ui.MUTED);
+        if(!inside)Ui.text(card,"Только Samsung / Samsung only. Другие модели требуют совместимый runtime; текущие пакеты — S23/FZG1, Android 16 / arm64.",12,Ui.MUTED);
+        if(!inside)buttons.add(Ui.button(page,"Compatibility / Совместимость",false,()->CompatibilityReport.show(this)));
         buttons.add(Ui.button(page,"Select GSI",false,this::chooseGsi));
         if(!inside)buttons.add(Ui.button(page,"Install runtime",false,()->{
             if(busy)return;

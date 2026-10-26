@@ -19,6 +19,8 @@ assert main.index('ColorOsProfile.matches(selectedSha)){confirmColorOs()')<main.
 assert 'COLOROS_START_DISPATCHED=' in main
 assert 'ro.product.model' not in script and 'ro.product.vendor.device' not in script
 assert 'ro.product.cpu.abi' in script and 'arm64-v8a' in script
+assert 'getprop ro.product.manufacturer' in script and 'getprop ro.product.brand' in script
+assert script.index('getprop ro.product.manufacturer') < script.index('getprop ro.build.version.sdk')
 color=(ROOT/'app/src/main/java/dev/tempgsi/controller/ColorOsProfile.java').read_text()
 assert 'DeviceProfile.requireHost();' in color and 'Build.MODEL' not in color
 assert 'new File("/data/oneos_genv.sh").isFile()' in color

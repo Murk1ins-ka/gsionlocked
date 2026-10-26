@@ -6,15 +6,29 @@
 
 Приложение и исходники экспериментального запуска GSI в отдельной среде на Galaxy S23.
 
+**Только Samsung.** Другие производители блокируются. Наличие Samsung в таблице
+OneOS не означает готовый runtime для этой модели в gsionlocked.
+
 **Баги ColorOS:** [не работает пароль/PIN](https://github.com/Murk1ins-ka/gsionlocked/issues/6),
 [входящие SMS и коды Google могут не доходить](https://github.com/Murk1ins-ka/gsionlocked/issues/7).
 Причина недоставки конкретного SMS пока не установлена.
 
 ## gsionlocked — Booting GSI via Treble Userspace Takeover
 
+### 0.3.1: Samsung и подготовка портов OneOS
+
+Добавлен экран **Compatibility / Совместимость** с локальным отчётом и распознаванием
+13 комбинаций модель/codename/SoC из OneOS. Это справочные профили для портирования,
+**не включённый запуск на 13 моделях**. Перенесены патчеры framework, native/overlay
+исходники, контракты staging и таблицы хешей. Session-скрипты OneLineage исключены
+из нового snapshot из-за отдельного ограничения в upstream NOTICE.
+Готовые runtime по-прежнему рассчитаны на S23/FZG1; backend для других Samsung
+и хостов Android 17 ещё требуется реализовать и проверить.
+[Таблица моделей, анализ и план портирования](docs/SAMSUNG_PORTING.md).
+
 ### Как правильно скачать и установить
 
-1. Открой [релиз v0.3.0](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.3.0-runtime-preview), раскрой **Assets** и скачай **`gsionlocked.apk`**. Архивы **Source code** и `gsionlocked-source.zip` — исходники для разработчиков, на телефон их устанавливать не нужно.
+1. Открой [релиз v0.3.1](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.3.1-samsung-preview), раскрой **Assets** и скачай **`gsionlocked.apk`**. Архивы **Source code** и `gsionlocked-source.zip` — исходники для разработчиков, на телефон их устанавливать не нужно.
 2. Открой [образы GSI в релизе v0.2.0](https://github.com/Murk1ins-ka/gsionlocked/releases/tag/v0.2.0-coloros-preview). Выбери **одну систему**:
    - **Evolution X:** скачай `EvoX-11.11-GSI_treble_arm64-ab-GAPPS-20260920.img.xz`.
    - **ColorOS:** скачай **все четыре части** `OneOS_ColorOS17_FindX9Ultra_IN.img.zip.001`–`.004` в одну папку.
@@ -36,7 +50,7 @@
 
 ### 0.2.1: снята блокировка по модели
 
-Название модели, codename и версия загрузчика больше не блокируют приложение.
+Название модели, codename и версия загрузчика больше не блокируют Samsung в приложении.
 Входные требования текущего загрузчика: **Android 16 / ARM64**, root и совместимый
 подготовленный runtime. Другие модели **не проверены**: это снятие ограничения,
 а не готовый универсальный порт. Для ColorOS сохраняются проверки framework

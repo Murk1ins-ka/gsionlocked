@@ -1,5 +1,10 @@
 # Compatibility
 
+**Samsung phones only (0.3.1).** The app's Compatibility screen recognizes upstream
+Samsung identity tuples for porting, not as enabled launch profiles. See
+[Samsung porting status](SAMSUNG_PORTING.md). Existing archive compatibility below
+does not expand merely because a model is recognized.
+
 ## EvoX / Android 16
 
 | Component | Evidence |

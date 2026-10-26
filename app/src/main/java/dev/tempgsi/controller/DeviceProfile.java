@@ -9,6 +9,8 @@ final class DeviceProfile {
     static final long IMAGE_BYTES=3863474176L;
     static final String SOURCE="/data/local/tmp/tempgsi-evox154/system.img";
     static void requireHost() throws IOException {
+        if(!SamsungProfiles.samsung(Build.MANUFACTURER,Build.BRAND))
+            throw new IOException("Samsung phones only. Other manufacturers are not supported.");
         if(Build.VERSION.SDK_INT!=36)
             throw new IOException("The current launcher requires an Android 16 host and a matching prepared runtime.");
         if(!java.util.Arrays.asList(Build.SUPPORTED_64_BIT_ABIS).contains("arm64-v8a"))
