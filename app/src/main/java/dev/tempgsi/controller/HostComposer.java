@@ -7,7 +7,14 @@ import java.util.*;
  * Reference: platform/system/core/init/README.md (services and interface options).
  * Deliberately refuses ambiguous definitions rather than guessing override order. */
 public final class HostComposer {
+    public static final class NoDeclaredComposer extends IOException {
+        NoDeclaredComposer(){super("No uniquely declared running display composer");}
+    }
     public interface State { String service(String name)throws IOException; }
+    public interface Running extends State {
+        String pid(String service)throws IOException;
+        String executable(String pid)throws IOException;
+    }
     public static final class Service {
         public final String name,executable,source,sourceSha;
         private final SortedSet<String> interfaces=new TreeSet<>();
@@ -44,7 +51,11 @@ public final class HostComposer {
             if(logical.length()==0&&physical.trim().startsWith("#"))continue;
             if(physical.endsWith("\\")){logical.append(physical,0,physical.length()-1).append(' ');if(logical.length()>65536)throw new IOException("Init logical line too long");continue;}
             logical.append(physical);if(logical.length()>65536)throw new IOException("Init logical line too long");
-            List<String> words=tokens(logical.toString());logical.setLength(0);if(words.isEmpty())continue;
+            String line=logical.toString();logical.setLength(0);
+            // Shell snippets in unrelated init actions are not our configuration.
+            // Only tokenize declarations/section boundaries and the options we inspect.
+            if(!line.trim().matches("(?:service|on|import|interface|critical|reboot_on_failure|override)(?:[ \\t].*)?"))continue;
+            List<String> words=tokens(line);if(words.isEmpty())continue;
             String op=words.get(0);
             if(op.equals("service")){
                 current=null;
@@ -73,7 +84,34 @@ public final class HostComposer {
             if(item.unsafe||definitions.get(item.name)!=1)throw new IOException("Ambiguous or critical active display composer: "+item.name);
             if(selected!=null)throw new IOException("Multiple active default display composers");selected=item;
         }
-        if(selected==null)throw new IOException("No uniquely declared running display composer");return selected;
+        if(selected==null)throw new NoDeclaredComposer();return selected;
+    }
+    public static SortedMap<String,String> hidlRegistry(String text)throws IOException {
+        if(text.length()>1024*1024)throw new IOException("HAL registry too large");
+        SortedMap<String,String> result=new TreeMap<>();
+        for(String line:text.split("\n")){
+            String[] fields=line.trim().split("\\s+");if(fields.length!=2)continue;
+            if(!fields[0].matches("android\\.hardware\\.graphics\\.composer@2\\.[1-4]::IComposer/default"))continue;
+            if(!fields[1].matches("[1-9][0-9]{0,9}"))continue;
+            if(result.put(fields[0],fields[1])!=null)throw new IOException("Duplicate registered composer interface");
+        }return result;
+    }
+    /** Older Samsung rc files omit 'interface'. Link registry PID to init PID and executable. */
+    public static Service selectRegistered(List<Service> services,Running state,SortedMap<String,String> registry)throws IOException {
+        Map<String,Integer> definitions=new HashMap<>();for(Service item:services)definitions.put(item.name,definitions.getOrDefault(item.name,0)+1);
+        Service selected=null;
+        for(Service item:services){
+            if(!item.executable.substring(item.executable.lastIndexOf('/')+1).contains("composer"))continue;
+            if(!"running".equals(state.service(item.name)))continue;
+            String pid=state.pid(item.name);if(!pid.matches("[1-9][0-9]{0,9}")||!registry.containsValue(pid))continue;
+            if(!item.executable.equals(state.executable(pid)))continue;
+            if(item.unsafe||definitions.get(item.name)!=1)throw new IOException("Ambiguous or critical registered composer");
+            if(selected!=null)throw new IOException("Multiple init services own registered composer");
+            Service identified=new Service(item.name,item.executable,item.source,item.sourceSha);
+            for(Map.Entry<String,String> entry:registry.entrySet())if(entry.getValue().equals(pid))identified.interfaces.add(entry.getKey());
+            selected=identified;
+        }
+        if(selected==null)throw new IOException("Registered composer ownership not proven");return selected;
     }
     private HostComposer(){}
 }

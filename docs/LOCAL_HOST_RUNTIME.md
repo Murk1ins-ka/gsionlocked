@@ -132,6 +132,13 @@ It records the service name, interface, executable, source path and source hash;
 these facts participate in the capsule cache identity. No service is restarted
 during capture. Imports, properties and init commands are not executed.
 
+For legacy rc files that omit the interface option, discovery can instead match
+the HIDL registry's server PID to init's service PID and the actual `/proc/PID/exe`
+path. All three must agree; the init executable must identify a composer. A
+stopped service, unrelated PID/executable or ambiguous definition is rejected.
+This fallback is only attempted when no active declaration supplies an interface;
+it does not bypass an ambiguous/critical declared service rejection.
+
 The candidate integration now uses this captured service instead of the fixed
 Qualcomm service name, and checks its captured AIDL/HIDL interface for readiness.
 Missing, duplicate or critical service definitions prevent candidate takeover.
@@ -143,5 +150,22 @@ display service. This discovery does not by itself enable another device.
 Fixture tests cover Qualcomm-style HIDL and Samsung-style AIDL declarations,
 line continuations and quoting, stopped services, duplicate/critical services,
 action-section boundaries and invalid executable paths. Generated candidate
-shell scripts pass syntax checks; real service discovery/restart on hardware
-has not been tested. See the [Android init language reference](https://android.googlesource.com/platform/system/core/+/refs/heads/main/init/README.md).
+shell scripts pass syntax checks. See the [Android init language reference](https://android.googlesource.com/platform/system/core/+/refs/heads/main/init/README.md).
+
+### S23 live preparation check, 2026-10-26
+
+On SM-S911B / Android 16 SDK 36, temporary root in the KernelSU context:
+
+- Local system capture derived 78 IInstalld methods and the selected system libraries.
+- The vendor composer rc lacked interface options. Registry/init PID/executable
+  matching found `vendor.qti.hardware.display.composer`, providing
+  `android.hardware.graphics.composer@2.4::IComposer/default`.
+- A repeated preparation reused and verified the same capsule and map hash.
+  The capsule root mode was 0700 and the mapping file mode was 0444.
+- Android extracted a compressed-APEX payload from a synthetic ext4 fixture;
+  its 8,192-byte output matched the expected SHA-256.
+- Host boot completion, zygote and SurfaceFlinger remained running, with SELinux
+  Enforcing. No guest switch, composer restart or partition write was performed.
+
+These checks validate preparation on this S23 only. A real common-runtime boot,
+the display handoff and compatibility with other Samsung devices remain unverified.
