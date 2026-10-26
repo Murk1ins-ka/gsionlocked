@@ -1,0 +1,36 @@
+name: Publish HyperOS S23 maintenance
+on:
+  push:
+    tags: ['v0.3.4.1-hyperos-maintenance']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package verified sources
+        shell: bash
+        run: |
+          mkdir -p dist
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile, subprocess, hashlib
+          src=Path('updates/hyperos-s23-0.3.4.1')
+          for line in (src/'SHA256SUMS').read_text().splitlines():
+              digest, name=line.split('  ',1)
+              assert hashlib.sha256((src/name).read_bytes()).hexdigest()==digest, name
+          with zipfile.ZipFile('dist/gsionlocked-hyperos-s23-maintenance-0.3.4.1.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(src.iterdir()):
+                  z.write(p,'hyperos-s23-0.3.4.1/'+p.name)
+          subprocess.run(['git','fetch','origin','refs/heads/release-input-v0.3.4.1'],check=True)
+          data=subprocess.check_output(['git','show','b2b48f312acb1f48b2208b5a134b7b8130a45e23:gsionlocked-0.3.4-hyperos-preview.apk'])
+          assert hashlib.sha256(data).hexdigest()=='fe058ca66fee9a0095b9784c84056d3833bb7cf0699b91299e3a879604a32969'
+          Path('dist/gsionlocked-0.3.4-hyperos-preview.apk').write_bytes(data)
+          Path('dist/SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(Path('dist').iterdir())))
+          PY
+      - name: Create release and upload assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "gsionlocked 0.3.4.1 - HyperOS S23 maintenance" --notes-file updates/hyperos-s23-0.3.4.1/README.md --prerelease
